@@ -84,7 +84,7 @@ namespace FoliageShading
 			foreach (Curve cl in centerLines)
 			{
 				List<Point3d> growthPoints = this.CreateGrowthPoints(cl, growthPointInterval);
-				shadings.AddRange(this.CreateStartingShadingPlanes(growthPoints, 1.0, baseSurfaces.First().NormalAt(0, 0)));
+				shadings.AddRange(this.CreateStartingShadingPlanes(growthPoints, 1.0, interval, baseSurfaces.First().NormalAt(0, 0)));
 			}
 			
 			DA.SetDataList(0, centerLines);
@@ -135,14 +135,21 @@ namespace FoliageShading
 			return growthPoints;
 		}
 
-		List<PlaneSurface> CreateStartingShadingPlanes(List<Point3d> growthPoints, double startingShadingWidth, Vector3d outsideDirection)
+		List<PlaneSurface> CreateStartingShadingPlanes(List<Point3d> growthPoints, double startingShadingDepth, double intervalDistance, Vector3d outsideDirection)
 		{
 			List<PlaneSurface> startingSurfaces = new List<PlaneSurface>();
 			foreach (Point3d gp in growthPoints)
 			{
-				PlaneSurface surface = new PlaneSurface(Plane.WorldXY, new Interval(-1 * startingShadingWidth / 2.0, startingShadingWidth / 2.0), new Interval(-1 * startingShadingWidth / 2.0, startingShadingWidth / 2.0)); 
+				PlaneSurface surface = new PlaneSurface(Plane.WorldXY, new Interval(-1 * startingShadingDepth / 2.0, startingShadingDepth / 2.0), new Interval(-1 * intervalDistance / 2.0, intervalDistance / 2.0));
+
+				Vector3d defaultDirection = new Vector3d(1, 0, 0); // faces X axis when the surface was created 
+				double rotationAngle = Math.Atan2(outsideDirection.Y * defaultDirection.X - outsideDirection.X * defaultDirection.Y, outsideDirection.X * defaultDirection.X + outsideDirection.Y * defaultDirection.Y);
+				bool s = surface.Rotate(rotationAngle, new Vector3d(0, 0, 1), new Point3d(0, 0, 0));
+				Debug.Assert(s);
+
 				Vector3d translation = new Vector3d(gp); // the vector points from 0,0,0 to gp
 				surface.Translate(translation);
+
 				startingSurfaces.Add(surface);
 			}
 
