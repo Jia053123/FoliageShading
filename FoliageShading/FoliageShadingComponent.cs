@@ -1,8 +1,11 @@
 using Grasshopper;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace FoliageShading
 {
@@ -31,10 +34,9 @@ namespace FoliageShading
 			// You can often supply default values when creating parameters.
 			// All parameters must have the correct access type. If you want 
 			// to import lists or trees of values, modify the ParamAccess flag.
-			pManager.AddPlaneParameter("Plane", "P", "Base plane for spiral", GH_ParamAccess.item, Plane.WorldXY);
-			pManager.AddNumberParameter("Inner Radius", "R0", "Inner radius for spiral", GH_ParamAccess.item, 1.0);
-			pManager.AddNumberParameter("Outer Radius", "R1", "Outer radius for spiral", GH_ParamAccess.item, 10.0);
-			pManager.AddIntegerParameter("Turns", "T", "Number of turns between radii", GH_ParamAccess.item, 10);
+
+			pManager.AddGeometryParameter("Base Surfaces", "B", "The areas to fill in with shadings", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Interval Distance", "I", "Horizontal distance between two shadings, in the model unit", GH_ParamAccess.item);
 
 			// If you want to change properties of certain parameters, 
 			// you can use the pManager instance to access them by index:
@@ -48,7 +50,9 @@ namespace FoliageShading
 		{
 			// Use the pManager object to register your output parameters.
 			// Output parameters do not have default values, but they too must have the correct access type.
-			pManager.AddCurveParameter("Spiral", "S", "Spiral curve", GH_ParamAccess.item);
+
+			pManager.AddGeometryParameter("Support Wires", "W", "the wires that support the shadings", GH_ParamAccess.list);
+			//pManager.AddSurfaceParameter("Shadings", "S", "the many pieces of the shadings generated", GH_ParamAccess.list);
 
 			// Sometimes you want to hide a specific parameter from the Rhino preview.
 			// You can use the HideParameter() method as a quick way:
@@ -64,66 +68,76 @@ namespace FoliageShading
 		{
 			// First, we need to retrieve all data from the input parameters.
 			// We'll start by declaring variables and assigning them starting values.
-			Plane plane = Plane.WorldXY;
-			double radius0 = 0.0;
-			double radius1 = 0.0;
-			int turns = 0;
+
+			List<PlaneSurface> inputGeometries = new List<PlaneSurface>();
+			Double interval = Double.NaN; 
 
 			// Then we need to access the input parameters individually. 
 			// When data cannot be extracted from a parameter, we should abort this method.
-			if (!DA.GetData(0, ref plane)) return;
-			if (!DA.GetData(1, ref radius0)) return;
-			if (!DA.GetData(2, ref radius1)) return;
-			if (!DA.GetData(3, ref turns)) return;
+
+			if (!DA.GetDataList(0, inputGeometries)) return;
+			if (!DA.GetData(1, ref interval)) return;
 
 			// We should now validate the data and warn the user if invalid data is supplied.
-			if (radius0 < 0.0)
+
+			List<PlaneSurface> baseSurfs = new List<PlaneSurface>();
+			foreach (IGH_GeometricGoo geo in inputGeometries)
 			{
-				AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Inner radius must be bigger than or equal to zero");
-				return;
+				if (geo is GH_Surface)
+				{
+					GH_Surface temp = (GH_Surface)geo;
+					PlaneSurface baseSurf;
+					temp.CastTo<PlaneSurface>(out baseSurf);
+					baseSurfs.Add(baseSurf);
+				}
+				else
+				{
+					AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One of the geometries is not a surface");
+					return;
+				}
 			}
-			if (radius1 <= radius0)
-			{
-				AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Outer radius must be bigger than the inner radius");
-				return;
-			}
-			if (turns <= 0)
-			{
-				AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Spiral turn count must be bigger than or equal to one");
-				return;
-			}
+
 
 			// We're set to create the spiral now. To keep the size of the SolveInstance() method small, 
 			// The actual functionality will be in a different method:
-			Curve spiral = CreateSpiral(plane, radius0, radius1, turns);
+
+			//Curve spiral = CreateSpiral(plane, radius0, radius1, turns);
 
 			// Finally assign the spiral to the output parameter.
-			DA.SetData(0, spiral);
+
+			//DA.SetData(0, spiral);
+			DA.SetData(0, this.CreateCenterLines(inputGeometries.First(), interval));
 		}
 
-		Curve CreateSpiral(Plane plane, double r0, double r1, Int32 turns)
+
+
+		List<Surface> CreateStartingShadings()
 		{
-			Line l0 = new Line(plane.Origin + r0 * plane.XAxis, plane.Origin + r1 * plane.XAxis);
-			Line l1 = new Line(plane.Origin - r0 * plane.XAxis, plane.Origin - r1 * plane.XAxis);
+			throw new NotImplementedException();
+		}
 
-			Point3d[] p0;
-			Point3d[] p1;
+		List<Curve> CreateCenterLines(PlaneSurface baseSurface, double intervalDist)
+		{
+			// reparameterize
+			bool s1 = baseSurface.SetDomain(0, new Interval(0, 1));
+			Debug.Assert(s1);
+			bool s2 = baseSurface.SetDomain(1, new Interval(0, 1));
+			Debug.Assert(s2);
 
-			l0.ToNurbsCurve().DivideByCount(turns, true, out p0);
-			l1.ToNurbsCurve().DivideByCount(turns, true, out p1);
+			double width, height;
+			baseSurface.GetSurfaceSize(out width, out height);
+			int numberOfCenterLines = (int) Math.Floor(width / intervalDist); // no lines at either ends because they mark the centers of the shadings
+			double intervalInU = 1.0 / (numberOfCenterLines + 1); // number of intervals = number of center lines + 1
 
-			PolyCurve spiral = new PolyCurve();
+			double padding = intervalInU / 2.0; // padding before the first center line and after the last one
 
-			for (int i = 0; i < p0.Length - 1; i++)
+			List<Curve> isoCurves = new List<Curve>();
+			for (int i = 0; i < numberOfCenterLines; i++)
 			{
-				Arc arc0 = new Arc(p0[i], plane.YAxis, p1[i + 1]);
-				Arc arc1 = new Arc(p1[i + 1], -plane.YAxis, p0[i + 1]);
-
-				spiral.Append(arc0);
-				spiral.Append(arc1);
+				isoCurves.Add(baseSurface.IsoCurve(1, i * intervalInU + padding));
 			}
 
-			return spiral;
+			return isoCurves;
 		}
 
 		/// <summary>
