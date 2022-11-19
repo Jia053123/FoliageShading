@@ -48,7 +48,7 @@ namespace FoliageShading
 			// Output parameters do not have default values, but they too must have the correct access type.
 
 			pManager.AddCurveParameter("Support Wires", "W", "the wires that support the shadings", GH_ParamAccess.list);
-			//pManager.AddSurfaceParameter("Shadings", "S", "the many pieces of the shadings generated", GH_ParamAccess.list);
+			pManager.AddSurfaceParameter("Shadings", "S", "the many pieces of the shadings generated", GH_ParamAccess.list);
 
 			//pManager.HideParameter(0);
 		}
@@ -74,18 +74,21 @@ namespace FoliageShading
 				return;
 			}
 
-			List<Curve> wires = new List<Curve>();
+			List<Curve> centerLines = new List<Curve>();
 			foreach (Surface s in baseSurfaces)
 			{
-				wires.AddRange(this.CreateCenterLines(s, interval));
+				centerLines.AddRange(this.CreateCenterLines(s, interval));
+			}
+
+			List<PlaneSurface> shadings = new List<PlaneSurface>();
+			foreach (Curve cl in centerLines)
+			{
+				List<Point3d> growthPoints = this.CreateGrowthPoints(cl, growthPointInterval);
+				shadings.AddRange(this.CreateStartingShadingPlanes(growthPoints, 1.0, baseSurfaces.First().NormalAt(0, 0)));
 			}
 			
-			DA.SetDataList(0, wires);
-		}
-
-		List<Surface> CreateStartingShadings()
-		{
-			throw new NotImplementedException();
+			DA.SetDataList(0, centerLines);
+			DA.SetDataList(1, shadings);
 		}
 
 		List<Curve> CreateCenterLines(Surface baseSurface, double intervalDist)
@@ -130,6 +133,20 @@ namespace FoliageShading
 			}
 
 			return growthPoints;
+		}
+
+		List<PlaneSurface> CreateStartingShadingPlanes(List<Point3d> growthPoints, double startingShadingWidth, Vector3d outsideDirection)
+		{
+			List<PlaneSurface> startingSurfaces = new List<PlaneSurface>();
+			foreach (Point3d gp in growthPoints)
+			{
+				PlaneSurface surface = new PlaneSurface(Plane.WorldXY, new Interval(-1 * startingShadingWidth / 2.0, startingShadingWidth / 2.0), new Interval(-1 * startingShadingWidth / 2.0, startingShadingWidth / 2.0)); 
+				Vector3d translation = new Vector3d(gp); // the vector points from 0,0,0 to gp
+				surface.Translate(translation);
+				startingSurfaces.Add(surface);
+			}
+
+			return startingSurfaces;
 		}
 
 		/// <summary>
