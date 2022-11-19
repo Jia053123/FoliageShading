@@ -34,7 +34,8 @@ namespace FoliageShading
 			pManager.AddPointParameter("Points for Ladybug Incident Radiation simulation", "P", "The points where the simulation is done for Ladybug Incident Radiation component", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Ladybug Incident Radiation Results", "LIR", "The 'results' output from Ladybug Incident Radiation component", GH_ParamAccess.list);
 
-			//pManager[0].Optional = true;
+			pManager[3].Optional = true;
+			pManager[4].Optional = true;
 		}
 
 		protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
