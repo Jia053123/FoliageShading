@@ -51,7 +51,7 @@ namespace FoliageShading
 			// Use the pManager object to register your output parameters.
 			// Output parameters do not have default values, but they too must have the correct access type.
 
-			pManager.AddGeometryParameter("Support Wires", "W", "the wires that support the shadings", GH_ParamAccess.list);
+			pManager.AddCurveParameter("Support Wires", "W", "the wires that support the shadings", GH_ParamAccess.list);
 			//pManager.AddSurfaceParameter("Shadings", "S", "the many pieces of the shadings generated", GH_ParamAccess.list);
 
 			// Sometimes you want to hide a specific parameter from the Rhino preview.
@@ -69,7 +69,7 @@ namespace FoliageShading
 			// First, we need to retrieve all data from the input parameters.
 			// We'll start by declaring variables and assigning them starting values.
 
-			List<PlaneSurface> inputGeometries = new List<PlaneSurface>();
+			List<Surface> inputGeometries = new List<Surface>();
 			Double interval = Double.NaN; 
 
 			// Then we need to access the input parameters individually. 
@@ -80,22 +80,23 @@ namespace FoliageShading
 
 			// We should now validate the data and warn the user if invalid data is supplied.
 
-			List<PlaneSurface> baseSurfs = new List<PlaneSurface>();
-			foreach (IGH_GeometricGoo geo in inputGeometries)
-			{
-				if (geo is GH_Surface)
-				{
-					GH_Surface temp = (GH_Surface)geo;
-					PlaneSurface baseSurf;
-					temp.CastTo<PlaneSurface>(out baseSurf);
-					baseSurfs.Add(baseSurf);
-				}
-				else
-				{
-					AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One of the geometries is not a surface");
-					return;
-				}
-			}
+			//List<Surface> baseSurfs = new List<Surface>();
+			//foreach (IGH_GeometricGoo geo in inputGeometries)
+			//{
+			//	if (geo is GH_Surface)
+			//	{
+			//		GH_Surface temp = (GH_Surface)geo;
+			//		Surface baseSurf = new PlaneSurface(Plane.WorldYZ, new Interval(0, 1), new Interval(0, 1));
+			//		GH_Convert.ToSurface_Primary(temp, ref baseSurf);
+			//		//temp.CastTo<PlaneSurface>(out baseSurf);
+			//		baseSurfs.Add(baseSurf);
+			//	}
+			//	else
+			//	{
+			//		AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One of the geometries is not a surface");
+			//		return;
+			//	}
+			//}
 
 
 			// We're set to create the spiral now. To keep the size of the SolveInstance() method small, 
@@ -106,7 +107,8 @@ namespace FoliageShading
 			// Finally assign the spiral to the output parameter.
 
 			//DA.SetData(0, spiral);
-			DA.SetData(0, this.CreateCenterLines(inputGeometries.First(), interval));
+			List<Curve> wires = this.CreateCenterLines(inputGeometries.First(), interval);
+			DA.SetData(0, wires);
 		}
 
 
@@ -116,7 +118,7 @@ namespace FoliageShading
 			throw new NotImplementedException();
 		}
 
-		List<Curve> CreateCenterLines(PlaneSurface baseSurface, double intervalDist)
+		List<Curve> CreateCenterLines(Surface baseSurface, double intervalDist)
 		{
 			// reparameterize
 			bool s1 = baseSurface.SetDomain(0, new Interval(0, 1));

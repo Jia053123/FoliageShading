@@ -1,8 +1,8 @@
 C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\bin\Debug\net48\FoliageShading.gha
 C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\bin\Debug\net48\FoliageShading.pdb
+C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\obj\Debug\net48\FoliageShading.csprojAssemblyReference.cache
 C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\obj\Debug\net48\FoliageShading.AssemblyInfoInputs.cache
 C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\obj\Debug\net48\FoliageShading.AssemblyInfo.cs
 C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\obj\Debug\net48\FoliageShading.csproj.CoreCompileInputs.cache
 C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\obj\Debug\net48\FoliageShading.gha
 C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\obj\Debug\net48\FoliageShading.pdb
-C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\obj\Debug\net48\FoliageShading.csprojAssemblyReference.cache
