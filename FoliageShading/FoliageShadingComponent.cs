@@ -34,7 +34,8 @@ namespace FoliageShading
 			// All parameters must have the correct access type. If you want to import lists or trees of values, modify the ParamAccess flag.
 
 			pManager.AddGeometryParameter("Base Surfaces", "B", "The areas to fill in with shadings", GH_ParamAccess.list);
-			pManager.AddNumberParameter("Interval Distance", "I", "Horizontal distance between two shadings, in the model unit", GH_ParamAccess.item);
+			pManager.AddNumberParameter("Interval Distance", "ID", "Horizontal distance between two shadings, in the model unit", GH_ParamAccess.item);
+			pManager.AddNumberParameter("Growth Point Interval", "GPI", "Vertical distance between two growth points, influencing density", GH_ParamAccess.item);
 
 			//pManager[0].Optional = true;
 		}
@@ -59,11 +60,13 @@ namespace FoliageShading
 		/// to store data in output parameters.</param>
 		protected override void SolveInstance(IGH_DataAccess DA)
 		{
-			List<Surface> inputGeometries = new List<Surface>();
+			List<Surface> baseSurfaces = new List<Surface>();
 			Double interval = Double.NaN; 
+			Double growthPointInterval = Double.NaN; 
 
-			if (!DA.GetDataList(0, inputGeometries)) return;
+			if (!DA.GetDataList(0, baseSurfaces)) return;
 			if (!DA.GetData(1, ref interval)) return;
+			if (!DA.GetData(2, ref growthPointInterval)) return;
 
 			if (interval <= 0)
 			{
@@ -72,7 +75,7 @@ namespace FoliageShading
 			}
 
 			List<Curve> wires = new List<Curve>();
-			foreach (Surface s in inputGeometries)
+			foreach (Surface s in baseSurfaces)
 			{
 				wires.AddRange(this.CreateCenterLines(s, interval));
 			}
@@ -96,7 +99,7 @@ namespace FoliageShading
 			double width, height;
 			baseSurface.GetSurfaceSize(out width, out height);
 			int numberOfCenterLines = (int) Math.Floor(width / intervalDist); // no lines at either ends because they mark the centers of the shadings
-			double intervalInU = 1.0 / numberOfCenterLines; // number of intervals = number of center lines
+			double intervalInU = 1.0 / numberOfCenterLines; 
 
 			double padding = intervalInU / 2.0; // padding before the first center line and after the last one
 
@@ -107,6 +110,26 @@ namespace FoliageShading
 			}
 
 			return isoCurves;
+		}
+
+		List<Point3d> CreateGrowthPoints(Curve centerLine, Double growthPointInterval)
+		{
+			// reparameterize
+			centerLine.Domain = new Interval(0, 1);
+			
+			double totalHeight = centerLine.GetLength();
+			int numberOfGrowthPoints = (int)Math.Floor(totalHeight / growthPointInterval); // no points at either ends 
+			double growthPointIntervalInV = 1.0 / numberOfGrowthPoints;
+
+			double padding = growthPointIntervalInV / 2.0;
+
+			List<Point3d> growthPoints = new List<Point3d>();
+			for (int i = 0; i < numberOfGrowthPoints; i++)
+			{
+				growthPoints.Add(centerLine.PointAt(i * growthPointIntervalInV + padding));
+			}
+
+			return growthPoints;
 		}
 
 		/// <summary>
