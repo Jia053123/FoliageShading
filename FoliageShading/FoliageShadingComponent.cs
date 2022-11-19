@@ -108,7 +108,7 @@ namespace FoliageShading
 
 			//DA.SetData(0, spiral);
 			List<Curve> wires = this.CreateCenterLines(inputGeometries.First(), interval);
-			DA.SetData(0, wires);
+			DA.SetDataList(0, wires);
 		}
 
 
