@@ -11,6 +11,7 @@ namespace FoliageShading
 {
 	public class FoliageShadingComponent : GH_Component
 	{
+		private Double startingShadingDepth = 0.5;
 		/// <summary>
 		/// Each implementation of GH_Component must provide a public 
 		/// constructor without any arguments.
@@ -25,37 +26,26 @@ namespace FoliageShading
 		{
 		}
 
-		/// <summary>
-		/// Registers all the input parameters for this component.
-		/// </summary>
 		protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
 		{
-			// You can often supply default values when creating parameters.
-			// All parameters must have the correct access type. If you want to import lists or trees of values, modify the ParamAccess flag.
-
 			pManager.AddGeometryParameter("Base Surfaces", "B", "The areas to fill in with shadings", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Interval Distance", "ID", "Horizontal distance between two shadings, in the model unit", GH_ParamAccess.item);
 			pManager.AddNumberParameter("Growth Point Interval", "GPI", "Vertical distance between two growth points, influencing density", GH_ParamAccess.item);
+			pManager.AddPointParameter("Points for Ladybug Incident Radiation simulation", "P", "The points where the simulation is done for Ladybug Incident Radiation component", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Ladybug Incident Radiation Results", "LIR", "The 'results' output from Ladybug Incident Radiation component", GH_ParamAccess.list);
 
 			//pManager[0].Optional = true;
 		}
 
-		/// <summary>
-		/// Registers all the output parameters for this component.
-		/// </summary>
 		protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
 		{
-			// Output parameters do not have default values, but they too must have the correct access type.
-
-			pManager.AddCurveParameter("Support Wires", "W", "the wires that support the shadings", GH_ParamAccess.list);
-			pManager.AddSurfaceParameter("Shadings", "S", "the many pieces of the shadings generated", GH_ParamAccess.list);
+			pManager.AddCurveParameter("Support Wires", "W", "The wires that support the shadings", GH_ParamAccess.list);
+			pManager.AddSurfaceParameter("Shadings", "S", "The many pieces of the shadings generated", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Grid Size for Ladybug Incident Radiation", "GS", "The grid size to use for Ladybug Incident Radiation simulations", GH_ParamAccess.item);
 
 			//pManager.HideParameter(0);
 		}
 
-		/// <summary>
-		/// This is the method that actually does the work.
-		/// </summary>
 		/// <param name="DA">The DA object can be used to retrieve data from input parameters and 
 		/// to store data in output parameters.</param>
 		protected override void SolveInstance(IGH_DataAccess DA)
@@ -86,9 +76,12 @@ namespace FoliageShading
 				List<Point3d> growthPoints = this.CreateGrowthPoints(cl, growthPointInterval);
 				shadings.AddRange(this.CreateStartingShadingPlanes(growthPoints, 1.0, interval, baseSurfaces.First().NormalAt(0, 0)));
 			}
-			
+
+			double gridSize = this.startingShadingDepth;
+
 			DA.SetDataList(0, centerLines);
 			DA.SetDataList(1, shadings);
+			DA.SetData(2, gridSize);
 		}
 
 		List<Curve> CreateCenterLines(Surface baseSurface, double intervalDist)
