@@ -30,16 +30,12 @@ namespace FoliageShading
 		/// </summary>
 		protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
 		{
-			// Use the pManager object to register your input parameters.
 			// You can often supply default values when creating parameters.
-			// All parameters must have the correct access type. If you want 
-			// to import lists or trees of values, modify the ParamAccess flag.
+			// All parameters must have the correct access type. If you want to import lists or trees of values, modify the ParamAccess flag.
 
 			pManager.AddGeometryParameter("Base Surfaces", "B", "The areas to fill in with shadings", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Interval Distance", "I", "Horizontal distance between two shadings, in the model unit", GH_ParamAccess.item);
 
-			// If you want to change properties of certain parameters, 
-			// you can use the pManager instance to access them by index:
 			//pManager[0].Optional = true;
 		}
 
@@ -48,14 +44,11 @@ namespace FoliageShading
 		/// </summary>
 		protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
 		{
-			// Use the pManager object to register your output parameters.
 			// Output parameters do not have default values, but they too must have the correct access type.
 
 			pManager.AddCurveParameter("Support Wires", "W", "the wires that support the shadings", GH_ParamAccess.list);
 			//pManager.AddSurfaceParameter("Shadings", "S", "the many pieces of the shadings generated", GH_ParamAccess.list);
 
-			// Sometimes you want to hide a specific parameter from the Rhino preview.
-			// You can use the HideParameter() method as a quick way:
 			//pManager.HideParameter(0);
 		}
 
@@ -66,52 +59,26 @@ namespace FoliageShading
 		/// to store data in output parameters.</param>
 		protected override void SolveInstance(IGH_DataAccess DA)
 		{
-			// First, we need to retrieve all data from the input parameters.
-			// We'll start by declaring variables and assigning them starting values.
-
 			List<Surface> inputGeometries = new List<Surface>();
 			Double interval = Double.NaN; 
-
-			// Then we need to access the input parameters individually. 
-			// When data cannot be extracted from a parameter, we should abort this method.
 
 			if (!DA.GetDataList(0, inputGeometries)) return;
 			if (!DA.GetData(1, ref interval)) return;
 
-			// We should now validate the data and warn the user if invalid data is supplied.
+			if (interval <= 0)
+			{
+				AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Interval must be positive");
+				return;
+			}
 
-			//List<Surface> baseSurfs = new List<Surface>();
-			//foreach (IGH_GeometricGoo geo in inputGeometries)
-			//{
-			//	if (geo is GH_Surface)
-			//	{
-			//		GH_Surface temp = (GH_Surface)geo;
-			//		Surface baseSurf = new PlaneSurface(Plane.WorldYZ, new Interval(0, 1), new Interval(0, 1));
-			//		GH_Convert.ToSurface_Primary(temp, ref baseSurf);
-			//		//temp.CastTo<PlaneSurface>(out baseSurf);
-			//		baseSurfs.Add(baseSurf);
-			//	}
-			//	else
-			//	{
-			//		AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One of the geometries is not a surface");
-			//		return;
-			//	}
-			//}
-
-
-			// We're set to create the spiral now. To keep the size of the SolveInstance() method small, 
-			// The actual functionality will be in a different method:
-
-			//Curve spiral = CreateSpiral(plane, radius0, radius1, turns);
-
-			// Finally assign the spiral to the output parameter.
-
-			//DA.SetData(0, spiral);
-			List<Curve> wires = this.CreateCenterLines(inputGeometries.First(), interval);
+			List<Curve> wires = new List<Curve>();
+			foreach (Surface s in inputGeometries)
+			{
+				wires.AddRange(this.CreateCenterLines(s, interval));
+			}
+			
 			DA.SetDataList(0, wires);
 		}
-
-
 
 		List<Surface> CreateStartingShadings()
 		{
@@ -129,7 +96,7 @@ namespace FoliageShading
 			double width, height;
 			baseSurface.GetSurfaceSize(out width, out height);
 			int numberOfCenterLines = (int) Math.Floor(width / intervalDist); // no lines at either ends because they mark the centers of the shadings
-			double intervalInU = 1.0 / (numberOfCenterLines + 1); // number of intervals = number of center lines + 1
+			double intervalInU = 1.0 / numberOfCenterLines; // number of intervals = number of center lines
 
 			double padding = intervalInU / 2.0; // padding before the first center line and after the last one
 
