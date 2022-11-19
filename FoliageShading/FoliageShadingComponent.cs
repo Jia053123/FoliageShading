@@ -12,12 +12,12 @@ namespace FoliageShading
 	public class FoliageShadingComponent : GH_Component
 	{
 		private Double startingShadingDepth = 0.5;
+		private bool hasPointsData = false;
+		private bool hasResultsData = false;
+
 		/// <summary>
-		/// Each implementation of GH_Component must provide a public 
-		/// constructor without any arguments.
-		/// Category represents the Tab in which the component will appear, 
-		/// Subcategory the panel. If you use non-existing tab or panel names, 
-		/// new tabs/panels will automatically be created.
+		/// Each implementation of GH_Component must provide a public constructor without any arguments.
+		/// Category represents the Tab in which the component will appear, Subcategory the panel. If you use non-existing tab or panel names, new tabs/panels will automatically be created.
 		/// </summary>
 		public FoliageShadingComponent()
 		  : base("FoliageShading", "Foliage",
@@ -53,11 +53,33 @@ namespace FoliageShading
 		{
 			List<Surface> baseSurfaces = new List<Surface>();
 			Double interval = Double.NaN; 
-			Double growthPointInterval = Double.NaN; 
+			Double growthPointInterval = Double.NaN;
+			List<Point3d> radiationPoints = new List<Point3d>();
+			List<Double> radiationResults = new List<Double>();
 
 			if (!DA.GetDataList(0, baseSurfaces)) return;
 			if (!DA.GetData(1, ref interval)) return;
 			if (!DA.GetData(2, ref growthPointInterval)) return;
+
+			if (DA.GetDataList(3, radiationPoints) && radiationPoints.Count > 0)
+			{
+				this.hasPointsData = true;
+			}
+			else
+			{
+				this.hasPointsData = false;
+				Console.WriteLine("No points data receieved");
+			}
+
+			if (DA.GetDataList(4, radiationResults) && radiationResults.Count > 0)
+			{
+				this.hasResultsData = true;
+			}
+			else
+			{
+				this.hasResultsData = false;
+				Console.WriteLine("No results data receieved");
+			}
 
 			if (interval <= 0)
 			{
