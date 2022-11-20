@@ -11,9 +11,11 @@ namespace FoliageShading
 {
 	public class FoliageShadingComponent : GH_Component
 	{
-		private Double startingShadingDepth = 0.5;
+		private Double startingShadingDepth = 1.0;
 		private bool hasPointsData = false;
 		private bool hasResultsData = false;
+		private String logOutput = "";
+		private int iteration = 0;
 
 		/// <summary>
 		/// Each implementation of GH_Component must provide a public constructor without any arguments.
@@ -43,6 +45,7 @@ namespace FoliageShading
 			pManager.AddCurveParameter("Support Wires", "W", "The wires that support the shadings", GH_ParamAccess.list);
 			pManager.AddSurfaceParameter("Shadings", "S", "The many pieces of the shadings generated", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Grid Size for Ladybug Incident Radiation", "GS", "The grid size to use for Ladybug Incident Radiation simulations", GH_ParamAccess.item);
+			pManager.AddTextParameter("Log", "L", "Information about the state of the compoment", GH_ParamAccess.item);
 
 			//pManager.HideParameter(0);
 		}
@@ -61,24 +64,26 @@ namespace FoliageShading
 			if (!DA.GetData(1, ref interval)) return;
 			if (!DA.GetData(2, ref growthPointInterval)) return;
 
-			if (DA.GetDataList(3, radiationPoints) && radiationPoints.Count > 0)
+			if (DA.GetDataList(3, radiationPoints) && radiationPoints.Count > 1)
 			{
 				this.hasPointsData = true;
+				logOutput += Environment.NewLine + "Points data received: count = " + radiationPoints.Count.ToString();
 			}
 			else
 			{
 				this.hasPointsData = false;
-				Console.WriteLine("No points data receieved");
+				logOutput += Environment.NewLine + "No points data received";
 			}
 
-			if (DA.GetDataList(4, radiationResults) && radiationResults.Count > 0)
+			if (DA.GetDataList(4, radiationResults) && radiationResults.Count > 1)
 			{
 				this.hasResultsData = true;
+				logOutput += Environment.NewLine + "Results data receieved: count = " + radiationResults.Count.ToString();
 			}
 			else
 			{
 				this.hasResultsData = false;
-				Console.WriteLine("No results data receieved");
+				logOutput += Environment.NewLine + "No results data receieved"; 
 			}
 
 			if (interval <= 0)
@@ -102,9 +107,14 @@ namespace FoliageShading
 
 			double gridSize = this.startingShadingDepth;
 
+			logOutput += Environment.NewLine + iteration.ToString();
+
 			DA.SetDataList(0, centerLines);
 			DA.SetDataList(1, shadings);
 			DA.SetData(2, gridSize);
+			DA.SetData(3, logOutput);
+
+			iteration += 1;
 		}
 
 		List<Curve> CreateCenterLines(Surface baseSurface, double intervalDist)
