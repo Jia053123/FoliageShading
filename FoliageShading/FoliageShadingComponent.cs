@@ -19,7 +19,8 @@ namespace FoliageShading
 
 		/// <summary>
 		/// Each implementation of GH_Component must provide a public constructor without any arguments.
-		/// Category represents the Tab in which the component will appear, Subcategory the panel. If you use non-existing tab or panel names, new tabs/panels will automatically be created.
+		/// Category represents the Tab in which the component will appear, Subcategory the panel. 
+		/// If you use non-existing tab or panel names, new tabs/panels will automatically be created.
 		/// </summary>
 		public FoliageShadingComponent()
 		  : base("FoliageShading", "Foliage",
@@ -50,8 +51,9 @@ namespace FoliageShading
 			//pManager.HideParameter(0);
 		}
 
-		/// <param name="DA">The DA object can be used to retrieve data from input parameters and 
-		/// to store data in output parameters.</param>
+		/// <param name="DA">
+		/// The DA object can be used to retrieve data from input parameters and to store data in output parameters.
+		/// </param>
 		protected override void SolveInstance(IGH_DataAccess DA)
 		{
 			List<Surface> baseSurfaces = new List<Surface>();
@@ -59,6 +61,8 @@ namespace FoliageShading
 			Double growthPointInterval = Double.NaN;
 			List<Point3d> radiationPoints = new List<Point3d>();
 			List<Double> radiationResults = new List<Double>();
+
+			///////////////////// Step1: Input
 
 			if (!DA.GetDataList(0, baseSurfaces)) return;
 			if (!DA.GetData(1, ref interval)) return;
@@ -92,6 +96,8 @@ namespace FoliageShading
 				return;
 			}
 
+			/////////////////// Step2: Create Geometry
+
 			List<Curve> centerLines = new List<Curve>();
 			foreach (Surface s in baseSurfaces)
 			{
@@ -106,6 +112,8 @@ namespace FoliageShading
 			}
 
 			double gridSize = this.startingShadingDepth;
+
+			///////////////// Step3: Output
 
 			logOutput += Environment.NewLine + iteration.ToString();
 
@@ -174,7 +182,7 @@ namespace FoliageShading
 			{
 				ShadingSurface surface = new ShadingSurface(Plane.WorldXY, new Interval(-1 * startingShadingDepth / 2.0, startingShadingDepth / 2.0), new Interval(-1 * intervalDistance / 2.0, intervalDistance / 2.0));
 
-				Vector3d defaultDirection = new Vector3d(1, 0, 0); // faces X axis when the surface was created 
+				Vector3d defaultDirection = surface.FacingDirection;
 				double rotationAngle = Math.Atan2(outsideDirection.Y * defaultDirection.X - outsideDirection.X * defaultDirection.Y, outsideDirection.X * defaultDirection.X + outsideDirection.Y * defaultDirection.Y);
 				surface.SetFacingDirection(rotationAngle);
 				surface.RotateAroundNormalDirection(rotationAngle);
@@ -188,26 +196,24 @@ namespace FoliageShading
 			return startingSurfaces;
 		}
 
+
+
 		/// <summary>
-		/// The Exposure property controls where in the panel a component icon 
-		/// will appear. There are seven possible locations (primary to septenary), 
-		/// each of which can be combined with the GH_Exposure.obscure flag, which 
-		/// ensures the component will only be visible on panel dropdowns.
+		/// The Exposure property controls where in the panel a component icon will appear. 
+		/// There are seven possible locations (primary to septenary), each of which can be combined with the GH_Exposure.obscure flag, 
+		/// which ensures the component will only be visible on panel dropdowns.
 		/// </summary>
 		public override GH_Exposure Exposure => GH_Exposure.primary;
 
 		/// <summary>
-		/// Provides an Icon for every component that will be visible in the User Interface.
-		/// Icons need to be 24x24 pixels.
-		/// You can add image files to your project resources and access them like this:
-		/// return Resources.IconForThisComponent;
+		/// Provides an Icon for every component that will be visible in the User Interface. Icons need to be 24x24 pixels.
+		/// You can add image files to your project resources and access them like this: return Resources.IconForThisComponent;
 		/// </summary>
 		protected override System.Drawing.Bitmap Icon => null;
 
 		/// <summary>
 		/// Each component must have a unique Guid to identify it. 
-		/// It is vital this Guid doesn't change otherwise old ghx files 
-		/// that use the old ID will partially fail during loading.
+		/// It is vital this Guid doesn't change otherwise old ghx files that use the old ID will partially fail during loading.
 		/// </summary>
 		public override Guid ComponentGuid => new Guid("3de06452-1374-475f-8a9f-b54cf4b94e09");
 	}
