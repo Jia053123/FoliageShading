@@ -11,16 +11,20 @@ namespace FoliageShading
 {
 	class ShadingSurface
 	{
-		private static readonly NLog.Logger Logger = NLog.LogManager.GetLogger("Default");
-		private Vector3d _normalDirection;
-		private Vector3d _facingDirection;
-		private Double _totalSunlightCapture;
-		private bool _isAnglePass = true;
 		public Vector3d NormalDirection { get { return _normalDirection; }}
 		public Vector3d FacingDirection { get { return _facingDirection; }}
 		public Double TotalSunlightCapture { get { return _totalSunlightCapture; }}
 		public Double Area { get { return AreaMassProperties.Compute(this.Surface, true, false, false, false).Area; } }
-		
+
+		private static readonly NLog.Logger Logger = NLog.LogManager.GetLogger("Default");
+		private Vector3d _normalDirection;
+		private Vector3d _facingDirection;
+		private Double _totalSunlightCapture;
+
+		//private bool isAnglePass = true;
+		private double previousTotalSunlighCapture = Double.NaN;
+		private double previousRotateAngle = Double.NaN;
+
 
 		/// <summary>
 		/// The plane surface underneath. Unfortunatly subclassing doesn't trick Rhino
@@ -75,20 +79,33 @@ namespace FoliageShading
 			this._totalSunlightCapture = radiationAtPoints.Sum();
 			Logger.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
 
+			this.Turn();
+			//this.Grow();
 
-			if (this._isAnglePass)
-			{
-				this.Turn();
-			}
-			else
-			{
-				this.Grow();
-			}
+			this.previousTotalSunlighCapture = this._totalSunlightCapture;
 		}
 
 		private void Turn()
 		{
-			this.RotateAroundFacingDirection(0.1);
+			if (Double.IsNaN(this.previousTotalSunlighCapture) || Double.IsNaN(this.previousRotateAngle))
+			{
+				this.RotateAroundFacingDirection(0.1); // this is the first iteration
+				this.previousRotateAngle = 0.1;
+			}
+			else
+			{
+				if (this._totalSunlightCapture > this.previousTotalSunlighCapture)
+				{
+					this.RotateAroundFacingDirection(this.previousRotateAngle); // getting more light, so keep doing it
+				}
+				else
+				{
+					double newAngle = -1.0 * this.previousRotateAngle * 0.8;
+					this.RotateAroundFacingDirection(newAngle); // rotate back by a lesser degree
+					this.previousRotateAngle = newAngle;
+				}
+			}
+			
 		}
 
 		private void Grow()
