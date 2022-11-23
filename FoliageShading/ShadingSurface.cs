@@ -15,6 +15,7 @@ namespace FoliageShading
 		private Vector3d _normalDirection;
 		private Vector3d _facingDirection;
 		private Double _totalSunlightCapture;
+		private bool _isAnglePass = true;
 		public Vector3d NormalDirection { get { return _normalDirection; }}
 		public Vector3d FacingDirection { get { return _facingDirection; }}
 		public Double TotalSunlightCapture { get { return _totalSunlightCapture; }}
@@ -74,6 +75,24 @@ namespace FoliageShading
 			this._totalSunlightCapture = radiationAtPoints.Sum();
 			Logger.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
 
+
+			if (this._isAnglePass)
+			{
+				this.Turn();
+			}
+			else
+			{
+				this.Grow();
+			}
+		}
+
+		private void Turn()
+		{
+			this.RotateAroundFacingDirection(0.1);
+		}
+
+		private void Grow()
+		{
 			if (this._totalSunlightCapture > 1000 * 4)
 			{
 				Plane plane;
