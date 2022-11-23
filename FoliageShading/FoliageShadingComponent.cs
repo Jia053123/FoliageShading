@@ -136,7 +136,18 @@ namespace FoliageShading
 			DA.SetData(2, gridSize);
 			DA.SetData(3, logOutput);
 
-			int numOfPointsForEachShading = (int) Math.Floor((double) radiationPoints.Count / shadings.Count);
+			double roughNumOfPointsForEachShading = radiationPoints.Count / shadings.Count;
+			if (roughNumOfPointsForEachShading % 1 != 0)
+			{
+				roughNumOfPointsForEachShading = Math.Floor(roughNumOfPointsForEachShading);
+				logOutput += Environment.NewLine + "Warning: Num of points is not a muliple of the num of shadings";
+			}
+			else
+			{
+				logOutput += Environment.NewLine + "Great, num of points is a muliple of the num of shadings";
+			}
+			int numOfPointsForEachShading = (int) roughNumOfPointsForEachShading;
+
 			if (indexForPointsToVisualize > -1)
 			{
 				List<Point3d> pointsToVisualize = radiationPoints.GetRange(indexForPointsToVisualize * numOfPointsForEachShading, numOfPointsForEachShading);
