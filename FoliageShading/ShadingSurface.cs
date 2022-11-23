@@ -80,7 +80,7 @@ namespace FoliageShading
 			Logger.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
 
 			this.Turn();
-			//this.Grow();
+			this.Grow();
 
 			this.previousTotalSunlighCapture = this._totalSunlightCapture;
 		}
@@ -110,7 +110,7 @@ namespace FoliageShading
 
 		private void Grow()
 		{
-			if (this._totalSunlightCapture > 1000 * 4)
+			if (this._totalSunlightCapture > 800 * 4)
 			{
 				Plane plane;
 				this.Surface.TryGetPlane(out plane);
