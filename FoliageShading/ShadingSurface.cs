@@ -13,18 +13,9 @@ namespace FoliageShading
 		private Vector3d _normalDirection;
 		private Vector3d _facingDirection;
 		private Double _totalSunlightCapture;
-		public Vector3d NormalDirection 
-		{
-			get { return _normalDirection; }
-		}
-		public Vector3d FacingDirection 
-		{
-			get { return _facingDirection; }
-		}
-		public Double TotalSunlightCapture
-		{
-			get { return _totalSunlightCapture; }
-		}
+		public Vector3d NormalDirection { get { return _normalDirection; }}
+		public Vector3d FacingDirection { get { return _facingDirection; }}
+		public Double TotalSunlightCapture { get { return _totalSunlightCapture; }}
 
 		/// <summary>
 		/// The plane surface underneath. Unfortunatly subclassing doesn't trick Rhino
@@ -69,6 +60,11 @@ namespace FoliageShading
 		public void TranslateSurface(Vector3d directionAndDistance)
 		{
 			this.Surface.Translate(directionAndDistance);
+		}
+
+		public void SetIlluminationData(List<Point3d> points, List<double> illuminationAtPoints)
+		{
+
 		}
 	}
 }

@@ -16,6 +16,7 @@ namespace FoliageShading
 		private bool hasResultsData = false;
 		private String logOutput = "";
 		private int iteration = 0;
+		private ShadingsManager shadingsManger = new ShadingsManager();
 
 		/// <summary>
 		/// Each implementation of GH_Component must provide a public constructor without any arguments.
@@ -66,7 +67,7 @@ namespace FoliageShading
 			List<Double> radiationResults = new List<Double>();
 			int indexForPointsToVisualize = -1;
 
-			///////////////////// Step1: Input
+			///////////////////// Step1: Access and validate input
 
 			if (!DA.GetDataList(0, baseSurfaces)) return;
 			if (!DA.GetData(1, ref interval)) return;
@@ -102,33 +103,19 @@ namespace FoliageShading
 				return;
 			}
 
-			
-
 			/////////////////// Step2: Create Geometry
 
-			List<Curve> centerLines = new List<Curve>();
-			foreach (Surface s in baseSurfaces)
-			{
-				centerLines.AddRange(this.CreateCenterLines(s, interval));
-			}
-
-			List<ShadingSurface> shadings = new List<ShadingSurface>();
-			foreach (Curve cl in centerLines)
-			{
-				List<Point3d> growthPoints = this.CreateGrowthPoints(cl, growthPointInterval);
-				shadings.AddRange(this.CreateStartingShadingPlanes(growthPoints, 1.0, interval, baseSurfaces.First().NormalAt(0, 0)));
-			}
-
+			this.shadingsManger.InitializeShadingSurfaces(baseSurfaces, interval, growthPointInterval, startingShadingDepth);
 			double gridSize = this.startingShadingDepth;
 
 			///////////////// Step3: Output
 
 			logOutput += Environment.NewLine + iteration.ToString();
 
-			DA.SetDataList(0, centerLines);
+			DA.SetDataList(0, this.shadingsManger.CenterLines);
 
 			List<PlaneSurface> shadingsOutput = new List<PlaneSurface>();
-			foreach (ShadingSurface ss in shadings)
+			foreach (ShadingSurface ss in this.shadingsManger.ShadingSurfaces)
 			{
 				shadingsOutput.Add((PlaneSurface)ss.Surface);
 			}
@@ -136,8 +123,8 @@ namespace FoliageShading
 			DA.SetData(2, gridSize);
 			DA.SetData(3, logOutput);
 
-			double roughNumOfPointsForEachShading = radiationPoints.Count / shadings.Count;
-			if (roughNumOfPointsForEachShading % 1 != 0)
+			double roughNumOfPointsForEachShading = radiationPoints.Count / this.shadingsManger.ShadingSurfaces.Count;
+			if (roughNumOfPointsForEachShading % 1 != 0) 
 			{
 				roughNumOfPointsForEachShading = Math.Floor(roughNumOfPointsForEachShading);
 				logOutput += Environment.NewLine + "Warning: Num of points is not a muliple of the num of shadings";
@@ -156,73 +143,6 @@ namespace FoliageShading
 
 			iteration += 1;
 		}
-
-		List<Curve> CreateCenterLines(Surface baseSurface, double intervalDist)
-		{
-			// reparameterize
-			bool s1 = baseSurface.SetDomain(0, new Interval(0, 1));
-			Debug.Assert(s1);
-			bool s2 = baseSurface.SetDomain(1, new Interval(0, 1));
-			Debug.Assert(s2);
-
-			double width, height;
-			baseSurface.GetSurfaceSize(out width, out height);
-			int numberOfCenterLines = (int) Math.Floor(width / intervalDist); // no lines at either ends because they mark the centers of the shadings
-			double intervalInU = 1.0 / numberOfCenterLines; 
-
-			double padding = intervalInU / 2.0; // padding before the first center line and after the last one
-
-			List<Curve> isoCurves = new List<Curve>();
-			for (int i = 0; i < numberOfCenterLines; i++)
-			{
-				isoCurves.Add(baseSurface.IsoCurve(1, i * intervalInU + padding));
-			}
-
-			return isoCurves;
-		}
-
-		List<Point3d> CreateGrowthPoints(Curve centerLine, Double growthPointInterval)
-		{
-			// reparameterize
-			centerLine.Domain = new Interval(0, 1);
-			
-			double totalHeight = centerLine.GetLength();
-			int numberOfGrowthPoints = (int)Math.Floor(totalHeight / growthPointInterval); // no points at either ends 
-			double growthPointIntervalInV = 1.0 / numberOfGrowthPoints;
-
-			double padding = growthPointIntervalInV / 2.0;
-
-			List<Point3d> growthPoints = new List<Point3d>();
-			for (int i = 0; i < numberOfGrowthPoints; i++)
-			{
-				growthPoints.Add(centerLine.PointAt(i * growthPointIntervalInV + padding));
-			}
-
-			return growthPoints;
-		}
-
-		List<ShadingSurface> CreateStartingShadingPlanes(List<Point3d> growthPoints, double startingShadingDepth, double intervalDistance, Vector3d outsideDirection)
-		{
-			List<ShadingSurface> startingSurfaces = new List<ShadingSurface>();
-			foreach (Point3d gp in growthPoints)
-			{
-				ShadingSurface surface = new ShadingSurface(Plane.WorldXY, new Interval(-1 * startingShadingDepth / 2.0, startingShadingDepth / 2.0), new Interval(-1 * intervalDistance / 2.0, intervalDistance / 2.0));
-
-				Vector3d defaultDirection = surface.FacingDirection;
-				double rotationAngle = Math.Atan2(outsideDirection.Y * defaultDirection.X - outsideDirection.X * defaultDirection.Y, outsideDirection.X * defaultDirection.X + outsideDirection.Y * defaultDirection.Y);
-				surface.SetFacingDirection(rotationAngle);
-				surface.RotateAroundNormalDirection(rotationAngle);
-
-				Vector3d translation = new Vector3d(gp); // the vector points from 0,0,0 to gp
-				surface.TranslateSurface(translation);
-
-				startingSurfaces.Add(surface);
-			}
-
-			return startingSurfaces;
-		}
-
-
 
 		/// <summary>
 		/// The Exposure property controls where in the panel a component icon will appear. 
