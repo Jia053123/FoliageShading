@@ -67,7 +67,7 @@ namespace FoliageShading
 			List<Double> radiationResults = new List<Double>();
 			int indexForPointsToVisualize = -1;
 
-			///////////////////// Step1: Access and validate input
+			//////////////////// Step1: Access and validate input
 
 			if (!DA.GetDataList(0, baseSurfaces)) return;
 			if (!DA.GetData(1, ref interval)) return;
@@ -103,15 +103,19 @@ namespace FoliageShading
 				return;
 			}
 
-			/////////////////// Step2: Create Geometry
+			/////////////////// Step2: Create and Manipulate Geometry
 
-			this.shadingsManger.InitializeShadingSurfaces(baseSurfaces, interval, growthPointInterval, startingShadingDepth);
-			double gridSize = this.startingShadingDepth;
+			if (!this.shadingsManger.IsInitialized)
+			{
+				this.shadingsManger.InitializeShadingSurfaces(baseSurfaces, interval, growthPointInterval, startingShadingDepth);
+			}
+			else if (this.hasPointsData && this.hasResultsData)
+			{
+				this.shadingsManger.UpdateSurfacesWithRadiationData(radiationPoints, radiationResults);
+			}
 
-			///////////////// Step3: Output
-
-			logOutput += Environment.NewLine + iteration.ToString();
-
+			/////////////////// Step3: Output 
+			
 			DA.SetDataList(0, this.shadingsManger.CenterLines);
 
 			List<PlaneSurface> shadingsOutput = new List<PlaneSurface>();
@@ -120,7 +124,11 @@ namespace FoliageShading
 				shadingsOutput.Add((PlaneSurface)ss.Surface);
 			}
 			DA.SetDataList(1, shadingsOutput);
+
+			double gridSize = this.startingShadingDepth;
 			DA.SetData(2, gridSize);
+
+			logOutput += Environment.NewLine + iteration.ToString();
 			DA.SetData(3, logOutput);
 
 			double roughNumOfPointsForEachShading = radiationPoints.Count / this.shadingsManger.ShadingSurfaces.Count;

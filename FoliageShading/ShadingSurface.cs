@@ -4,18 +4,22 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NLog;
 using Rhino.Geometry;
 
 namespace FoliageShading
 {
 	class ShadingSurface
 	{
+		private Logger log = LogManager.GetCurrentClassLogger();
 		private Vector3d _normalDirection;
 		private Vector3d _facingDirection;
 		private Double _totalSunlightCapture;
 		public Vector3d NormalDirection { get { return _normalDirection; }}
 		public Vector3d FacingDirection { get { return _facingDirection; }}
 		public Double TotalSunlightCapture { get { return _totalSunlightCapture; }}
+		public Double Area { get { return AreaMassProperties.Compute(this.Surface, true, false, false, false).Area; } }
+		
 
 		/// <summary>
 		/// The plane surface underneath. Unfortunatly subclassing doesn't trick Rhino
@@ -62,9 +66,14 @@ namespace FoliageShading
 			this.Surface.Translate(directionAndDistance);
 		}
 
-		public void SetRadiationData(List<Point3d> points, List<double> illuminationAtPoints)
+		/// <summary>
+		/// Update the shading for each iteration
+		/// </summary>
+		public void SetRadiationDataAndUpdate(List<Point3d> points, List<double> radiationAtPoints)
 		{
-			
+			this._totalSunlightCapture = radiationAtPoints.Sum();
+			log.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
+
 		}
 	}
 }

@@ -12,8 +12,10 @@ namespace FoliageShading
 	{
 		private List<ShadingSurface> _shadingSurfaces;
 		private List<Curve> _centerLines;
-		public List<ShadingSurface> ShadingSurfaces { get {return this._shadingSurfaces;}}
-		public List<Curve> CenterLines { get {return this._centerLines;}}
+		private bool _isInitialized = false;
+		public List<ShadingSurface> ShadingSurfaces { get { return this._shadingSurfaces; } }
+		public List<Curve> CenterLines { get { return this._centerLines; } }
+		public bool IsInitialized { get { return this._isInitialized; } }
 
 		public void InitializeShadingSurfaces(List<Surface> baseSurfaces, Double intervalDist, Double growthPointInterval, Double startingShadingDepth)
 		{
@@ -32,6 +34,8 @@ namespace FoliageShading
 
 			this._shadingSurfaces = shadings;
 			this._centerLines = centerLines;
+
+			this._isInitialized = true;
 		}
 
 		public void UpdateSurfacesWithRadiationData(List<Point3d> sensorPoints, List<double> radiationDataAtPoints)
@@ -46,7 +50,7 @@ namespace FoliageShading
 				var s = this._shadingSurfaces[i];
 				int startIndex = i * numOfPointsForEachShading;
 				int pointCount = numOfPointsForEachShading;
-				s.SetRadiationData(sensorPoints.GetRange(startIndex, pointCount), radiationDataAtPoints.GetRange(startIndex, pointCount));
+				s.SetRadiationDataAndUpdate(sensorPoints.GetRange(startIndex, pointCount), radiationDataAtPoints.GetRange(startIndex, pointCount));
 			}
 		}
 
