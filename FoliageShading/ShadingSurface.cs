@@ -74,6 +74,13 @@ namespace FoliageShading
 			this._totalSunlightCapture = radiationAtPoints.Sum();
 			Logger.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
 
+			if (this._totalSunlightCapture > 1000 * 4)
+			{
+				Plane plane;
+				this.Surface.TryGetPlane(out plane);
+				Transform scale1d = Transform.Scale(plane, 1.1, 1, 1);
+				this.Surface.Transform(scale1d);
+			}
 		}
 	}
 }
