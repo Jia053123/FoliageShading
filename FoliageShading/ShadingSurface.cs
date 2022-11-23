@@ -11,7 +11,7 @@ namespace FoliageShading
 {
 	class ShadingSurface
 	{
-		private Logger log = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger Logger = NLog.LogManager.GetLogger("Default");
 		private Vector3d _normalDirection;
 		private Vector3d _facingDirection;
 		private Double _totalSunlightCapture;
@@ -72,7 +72,7 @@ namespace FoliageShading
 		public void SetRadiationDataAndUpdate(List<Point3d> points, List<double> radiationAtPoints)
 		{
 			this._totalSunlightCapture = radiationAtPoints.Sum();
-			log.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
+			Logger.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
 
 		}
 	}
