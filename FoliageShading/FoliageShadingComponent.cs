@@ -36,9 +36,11 @@ namespace FoliageShading
 			pManager.AddNumberParameter("Growth Point Interval", "GPI", "Vertical distance between two growth points, influencing density", GH_ParamAccess.item);
 			pManager.AddPointParameter("Points for Ladybug Incident Radiation simulation", "P", "The points where the simulation is done for Ladybug Incident Radiation component", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Ladybug Incident Radiation Results", "LIR", "The 'results' output from Ladybug Incident Radiation component", GH_ParamAccess.list);
+			pManager.AddIntegerParameter("Points for shading at index", "PFS", "Visuallize simulation grid points locations for each shading by index", GH_ParamAccess.item);
 
 			pManager[3].Optional = true;
 			pManager[4].Optional = true;
+			pManager[5].Optional = true;
 		}
 
 		protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -47,6 +49,7 @@ namespace FoliageShading
 			pManager.AddSurfaceParameter("Shadings", "S", "The many pieces of the shadings generated", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Grid Size for Ladybug Incident Radiation", "GS", "The grid size to use for Ladybug Incident Radiation simulations", GH_ParamAccess.item);
 			pManager.AddTextParameter("Log", "L", "Information about the state of the compoment", GH_ParamAccess.item);
+			pManager.AddPointParameter("Points for shading at index", "P", "The Points for shading at selected index for debugging", GH_ParamAccess.list);
 
 			//pManager.HideParameter(0);
 		}
@@ -61,6 +64,7 @@ namespace FoliageShading
 			Double growthPointInterval = Double.NaN;
 			List<Point3d> radiationPoints = new List<Point3d>();
 			List<Double> radiationResults = new List<Double>();
+			int indexForPointsToVisualize = -1;
 
 			///////////////////// Step1: Input
 
@@ -90,11 +94,15 @@ namespace FoliageShading
 				logOutput += Environment.NewLine + "No results data receieved"; 
 			}
 
+			DA.GetData(5, ref indexForPointsToVisualize);
+
 			if (interval <= 0)
 			{
 				AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Interval must be positive");
 				return;
 			}
+
+			
 
 			/////////////////// Step2: Create Geometry
 
@@ -127,6 +135,13 @@ namespace FoliageShading
 			DA.SetDataList(1, shadingsOutput);
 			DA.SetData(2, gridSize);
 			DA.SetData(3, logOutput);
+
+			int numOfPointsForEachShading = (int) Math.Floor((double) radiationPoints.Count / shadings.Count);
+			if (indexForPointsToVisualize > -1)
+			{
+				List<Point3d> pointsToVisualize = radiationPoints.GetRange(indexForPointsToVisualize * numOfPointsForEachShading, numOfPointsForEachShading);
+				DA.SetDataList(4, pointsToVisualize);
+			}
 
 			iteration += 1;
 		}

@@ -11,14 +11,19 @@ namespace FoliageShading
 	class ShadingSurface
 	{
 		private Vector3d _normalDirection;
+		private Vector3d _facingDirection;
+		private Double _totalSunlightCapture;
 		public Vector3d NormalDirection 
 		{
 			get { return _normalDirection; }
 		}
-		private Vector3d _facingDirection;
-		public Vector3d FacingDirection
+		public Vector3d FacingDirection 
 		{
 			get { return _facingDirection; }
+		}
+		public Double TotalSunlightCapture
+		{
+			get { return _totalSunlightCapture; }
 		}
 
 		/// <summary>
@@ -35,6 +40,7 @@ namespace FoliageShading
 
 			this._normalDirection = new Vector3d(0, 0, 1); // init to facing upwards (z)
 			this._facingDirection = new Vector3d(1, 0, 0); // init to facing X axis
+			this._totalSunlightCapture = Double.NaN;
 		}
 
 		/// <summary>
