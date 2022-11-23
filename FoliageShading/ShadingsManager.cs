@@ -14,7 +14,6 @@ namespace FoliageShading
 		private List<Curve> _centerLines;
 		public List<ShadingSurface> ShadingSurfaces { get {return this._shadingSurfaces;}}
 		public List<Curve> CenterLines { get {return this._centerLines;}}
-		
 
 		public void InitializeShadingSurfaces(List<Surface> baseSurfaces, Double intervalDist, Double growthPointInterval, Double startingShadingDepth)
 		{
@@ -33,6 +32,22 @@ namespace FoliageShading
 
 			this._shadingSurfaces = shadings;
 			this._centerLines = centerLines;
+		}
+
+		public void UpdateSurfacesWithRadiationData(List<Point3d> sensorPoints, List<double> radiationDataAtPoints)
+		{
+			Debug.Assert(sensorPoints.Count == radiationDataAtPoints.Count);
+			double roughNumOfPointsForEachShading = sensorPoints.Count / this._shadingSurfaces.Count;
+			int numOfPointsForEachShading = (int) Math.Floor(roughNumOfPointsForEachShading);
+			Debug.Assert(numOfPointsForEachShading == roughNumOfPointsForEachShading);
+
+			for (int i = 0; i < this._shadingSurfaces.Count; i++)
+			{
+				var s = this._shadingSurfaces[i];
+				int startIndex = i * numOfPointsForEachShading;
+				int pointCount = numOfPointsForEachShading;
+				s.SetRadiationData(sensorPoints.GetRange(startIndex, pointCount), radiationDataAtPoints.GetRange(startIndex, pointCount));
+			}
 		}
 
 		private List<Curve> CreateCenterLines(Surface baseSurface, double intervalDist)

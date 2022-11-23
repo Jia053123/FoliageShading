@@ -62,9 +62,9 @@ namespace FoliageShading
 			this.Surface.Translate(directionAndDistance);
 		}
 
-		public void SetIlluminationData(List<Point3d> points, List<double> illuminationAtPoints)
+		public void SetRadiationData(List<Point3d> points, List<double> illuminationAtPoints)
 		{
-
+			
 		}
 	}
 }

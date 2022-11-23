@@ -129,10 +129,7 @@ namespace FoliageShading
 				roughNumOfPointsForEachShading = Math.Floor(roughNumOfPointsForEachShading);
 				logOutput += Environment.NewLine + "Warning: Num of points is not a muliple of the num of shadings";
 			}
-			else
-			{
-				logOutput += Environment.NewLine + "Great, num of points is a muliple of the num of shadings";
-			}
+			
 			int numOfPointsForEachShading = (int) roughNumOfPointsForEachShading;
 
 			if (indexForPointsToVisualize > -1)
