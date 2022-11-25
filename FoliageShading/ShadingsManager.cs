@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rhino;
 using Rhino.Geometry;
 
 namespace FoliageShading
@@ -41,17 +42,50 @@ namespace FoliageShading
 		public void UpdateSurfacesWithRadiationData(List<Point3d> sensorPoints, List<double> radiationDataAtPoints)
 		{
 			Debug.Assert(sensorPoints.Count == radiationDataAtPoints.Count);
-			double roughNumOfPointsForEachShading = sensorPoints.Count / this._shadingSurfaces.Count;
-			int numOfPointsForEachShading = (int) Math.Floor(roughNumOfPointsForEachShading);
-			Debug.Assert(numOfPointsForEachShading == roughNumOfPointsForEachShading);
-
-			for (int i = 0; i < this._shadingSurfaces.Count; i++)
+			
+			foreach (ShadingSurface ss in this._shadingSurfaces)
 			{
-				var s = this._shadingSurfaces[i];
-				int startIndex = i * numOfPointsForEachShading;
-				int pointCount = numOfPointsForEachShading;
-				s.SetRadiationDataAndUpdate(sensorPoints.GetRange(startIndex, pointCount), radiationDataAtPoints.GetRange(startIndex, pointCount));
+				List<Point3d> sps = new List<Point3d>();
+				List<double> rdaps = new List<double>();
+				List<int> indexesAlreadyAdded = new List<int>();
+
+				for (int i = 0; i < sensorPoints.Count; i++)
+				{
+					if (!indexesAlreadyAdded.Contains(i)) // each point belongs only to one surface
+					{
+						var p = sensorPoints[i];
+						if (this.IsPointOnSurface(p, ss.Surface))
+						{
+							sps.Add(p);
+							rdaps.Add(radiationDataAtPoints[i]);
+							indexesAlreadyAdded.Add(i); 
+						}
+					}
+				}
+				ss.SetRadiationDataAndUpdate(sps, rdaps);
 			}
+
+
+			//double roughNumOfPointsForEachShading = sensorPoints.Count / this._shadingSurfaces.Count;
+			//int numOfPointsForEachShading = (int) Math.Floor(roughNumOfPointsForEachShading);
+			//Debug.Assert(numOfPointsForEachShading == roughNumOfPointsForEachShading);
+
+			//for (int i = 0; i < this._shadingSurfaces.Count; i++)
+			//{
+			//	var s = this._shadingSurfaces[i];
+			//	int startIndex = i * numOfPointsForEachShading;
+			//	int pointCount = numOfPointsForEachShading;
+			//	s.SetRadiationDataAndUpdate(sensorPoints.GetRange(startIndex, pointCount), radiationDataAtPoints.GetRange(startIndex, pointCount));
+			//}
+		}
+
+		private bool IsPointOnSurface(Point3d point, Surface surface)
+		{
+			double u, v;
+			surface.ClosestPoint(point, out u, out v);
+			var surf_p = surface.PointAt(u, v);
+
+			return surf_p.DistanceTo(point) <= RhinoDoc.ActiveDoc.ModelAbsoluteTolerance + 0.35; // refactor if porting to Mac
 		}
 
 		private List<Curve> CreateCenterLines(Surface baseSurface, double intervalDist)

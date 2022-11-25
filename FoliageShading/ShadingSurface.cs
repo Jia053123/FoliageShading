@@ -80,7 +80,9 @@ namespace FoliageShading
 		/// </summary>
 		public void SetRadiationDataAndUpdate(List<Point3d> points, List<double> radiationAtPoints)
 		{
+			Debug.WriteLine(points.Count);
 			this._totalSunlightCapture = radiationAtPoints.Sum();
+			//Debug.WriteLine(this._totalSunlightCapture);
 			Logger.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
 
 			this.Turn();
@@ -113,7 +115,7 @@ namespace FoliageShading
 				}
 				else
 				{
-					double newAngle = -1.0 * this.previousRotateAngle * 0.8;
+					double newAngle = -1.0 * this.previousRotateAngle * 0.6;
 					this.RotateAroundFacingDirection(newAngle); // rotate back by a lesser degree
 					this.previousRotateAngle = newAngle;
 				}
@@ -122,7 +124,7 @@ namespace FoliageShading
 
 		private void Grow()
 		{
-			if (this._totalSunlightCapture > 1100 * 4)
+			if (this._totalSunlightCapture > 1000 * 4)
 			{
 				Plane plane;
 				this.Surface.TryGetPlane(out plane);
