@@ -12,6 +12,8 @@ namespace FoliageShading
 	class ShadingSurface
 	{
 		public bool Alive = true;
+		public Double NatrualGrowthFactor = 1.0;
+		public int Iteration = 0;
 		public Vector3d NormalDirection { get { return _normalDirection; }}
 		public Vector3d FacingDirection { get { return _facingDirection; }}
 		public Double TotalSunlightCapture { get { return _totalSunlightCapture; }}
@@ -90,6 +92,7 @@ namespace FoliageShading
 			this.Survive();
 
 			this.previousTotalSunlighCapture = this._totalSunlightCapture;
+			this.Iteration++;
 		}
 
 		private void Turn()
@@ -128,7 +131,8 @@ namespace FoliageShading
 			//Debug.WriteLine("light: " + this._totalSunlightCapture.ToString());
 			//Debug.WriteLine("area: " + this.Area.ToString());
 
-			double growthFactor = 1 + Math.Tanh(this._totalSunlightCapture - Math.Pow((this.Area)*9.0, 2)) * 0.25;
+			//double growthFactor = 1 + Math.Tanh(this._totalSunlightCapture - Math.Pow(this.Area * 9.0, 2.08 - this.NatrualGrowthFactor * 0.10)) * 0.2;//(0.5 - Math.Log10(this.Iteration + 1)*0.20);
+			double growthFactor = 1 + Math.Tanh(this._totalSunlightCapture - Math.Pow(this.Area * 9.0, 2.0)) * 0.2;
 			Debug.WriteLine(growthFactor);
 
 			Plane plane;
