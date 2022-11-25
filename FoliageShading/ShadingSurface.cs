@@ -96,7 +96,7 @@ namespace FoliageShading
 			if (Double.IsNaN(this.previousTotalSunlighCapture) || Double.IsNaN(this.previousRotateAngle))
 			{
 				double angle = 0;
-				if (rand.NextDouble() - 0.5 > 0)
+				if (rand.Next(0,2) == 0)
 				{
 					angle = 0.1;
 				}
@@ -104,6 +104,7 @@ namespace FoliageShading
 				{
 					angle = -0.1;
 				}
+				//Debug.WriteLine(angle);
 				this.RotateAroundFacingDirection(angle); // this is the first iteration
 				this.previousRotateAngle = angle;
 			}
