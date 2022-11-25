@@ -25,13 +25,15 @@ namespace FoliageShading
 		private double previousTotalSunlighCapture = Double.NaN;
 		private double previousRotateAngle = Double.NaN;
 
+		private Random rand;
+
 
 		/// <summary>
 		/// The plane surface underneath. Unfortunatly subclassing doesn't trick Rhino
 		/// </summary>
 		public PlaneSurface Surface { get; }
 
-		public ShadingSurface(Plane plane, Interval xExtents, Interval yExtents)
+		public ShadingSurface(Plane plane, Interval xExtents, Interval yExtents, int seed)
 		{
 			this.Surface = new PlaneSurface(plane, xExtents, yExtents);
 			// reparameterize
@@ -41,6 +43,8 @@ namespace FoliageShading
 			this._normalDirection = new Vector3d(0, 0, 1); // init to facing upwards (z)
 			this._facingDirection = new Vector3d(1, 0, 0); // init to facing X axis
 			this._totalSunlightCapture = Double.NaN;
+
+			this.rand = new Random(seed);
 		}
 
 		/// <summary>
@@ -89,8 +93,17 @@ namespace FoliageShading
 		{
 			if (Double.IsNaN(this.previousTotalSunlighCapture) || Double.IsNaN(this.previousRotateAngle))
 			{
-				this.RotateAroundFacingDirection(0.1); // this is the first iteration
-				this.previousRotateAngle = 0.1;
+				double angle = 0;
+				if (rand.NextDouble() - 0.5 > 0)
+				{
+					angle = 0.1;
+				}
+				else
+				{
+					angle = -0.1;
+				}
+				this.RotateAroundFacingDirection(angle); // this is the first iteration
+				this.previousRotateAngle = angle;
 			}
 			else
 			{
@@ -105,12 +118,11 @@ namespace FoliageShading
 					this.previousRotateAngle = newAngle;
 				}
 			}
-			
 		}
 
 		private void Grow()
 		{
-			if (this._totalSunlightCapture > 800 * 4)
+			if (this._totalSunlightCapture > 1100 * 4)
 			{
 				Plane plane;
 				this.Surface.TryGetPlane(out plane);
