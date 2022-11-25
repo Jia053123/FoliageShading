@@ -44,27 +44,38 @@ namespace FoliageShading
 		public void UpdateSurfacesWithRadiationData(List<Point3d> sensorPoints, List<double> radiationDataAtPoints)
 		{
 			Debug.Assert(sensorPoints.Count == radiationDataAtPoints.Count);
-			
-			foreach (ShadingSurface ss in this._shadingSurfaces)
+
+			List<int> indexesOfDeadShadings = new List<int>();
+			for (int i = 0; i < this._shadingSurfaces.Count; i++)
 			{
+				ShadingSurface ss = this._shadingSurfaces[i];
 				List<Point3d> sps = new List<Point3d>();
 				List<double> rdaps = new List<double>();
 				List<int> indexesAlreadyAdded = new List<int>();
 
-				for (int i = 0; i < sensorPoints.Count; i++)
+				for (int j = 0; j < sensorPoints.Count; j++)
 				{
-					if (!indexesAlreadyAdded.Contains(i)) // each point belongs only to one surface
+					if (!indexesAlreadyAdded.Contains(j)) // each point belongs only to one surface
 					{
-						var p = sensorPoints[i];
+						var p = sensorPoints[j];
 						if (this.IsPointOnSurface(p, ss.Surface))
 						{
 							sps.Add(p);
-							rdaps.Add(radiationDataAtPoints[i]);
-							indexesAlreadyAdded.Add(i); 
+							rdaps.Add(radiationDataAtPoints[j]);
+							indexesAlreadyAdded.Add(j); 
 						}
 					}
 				}
 				ss.SetRadiationDataAndUpdate(sps, rdaps);
+				if (!ss.Alive)
+				{
+					indexesOfDeadShadings.Add(i);
+				}
+			}
+
+			for (int i = indexesOfDeadShadings.Count-1; i >= 0; i--) // indexesOfDeadShadings must be ascending
+			{
+				this._shadingSurfaces.RemoveAt(indexesOfDeadShadings[i]);
 			}
 		}
 

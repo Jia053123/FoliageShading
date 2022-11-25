@@ -11,6 +11,7 @@ namespace FoliageShading
 {
 	class ShadingSurface
 	{
+		public bool Alive = true;
 		public Vector3d NormalDirection { get { return _normalDirection; }}
 		public Vector3d FacingDirection { get { return _facingDirection; }}
 		public Double TotalSunlightCapture { get { return _totalSunlightCapture; }}
@@ -86,6 +87,7 @@ namespace FoliageShading
 
 			this.Turn();
 			this.Grow();
+			this.Survive();
 
 			this.previousTotalSunlighCapture = this._totalSunlightCapture;
 		}
@@ -133,6 +135,14 @@ namespace FoliageShading
 			this.Surface.TryGetPlane(out plane);
 			Transform scale1d = Transform.Scale(plane, growthFactor, 1, 1);
 			this.Surface.Transform(scale1d);
+		}
+
+		private void Survive()
+		{
+			if (this.Area < Constants.startingShadingDepth * Constants.intervalDistanceHorizontal)
+			{
+				this.Alive = false;
+			}
 		}
 	}
 }
