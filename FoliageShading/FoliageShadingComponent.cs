@@ -51,7 +51,7 @@ namespace FoliageShading
 			pManager.AddTextParameter("Log", "L", "Information about the state of the compoment", GH_ParamAccess.item);
 			pManager.AddPointParameter("Points for shading at index", "P", "The Points for shading at selected index for debugging", GH_ParamAccess.list);
 
-			//pManager.HideParameter(0);
+			pManager.HideParameter(0);
 		}
 
 		/// <param name="DA">
@@ -132,15 +132,9 @@ namespace FoliageShading
 			logOutput += Environment.NewLine + iteration.ToString();
 			DA.SetData(3, logOutput);
 
-			double roughNumOfPointsForEachShading = radiationPoints.Count / this.shadingsManger.ShadingSurfaces.Count;
-			if (roughNumOfPointsForEachShading % 1 != 0) 
-			{
-				roughNumOfPointsForEachShading = Math.Floor(roughNumOfPointsForEachShading);
-			}
-			int numOfPointsForEachShading = (int) roughNumOfPointsForEachShading;
 			if (indexForPointsToVisualize > -1)
 			{
-				List<Point3d> pointsToVisualize = radiationPoints.GetRange(indexForPointsToVisualize * numOfPointsForEachShading, numOfPointsForEachShading);
+				List<Point3d> pointsToVisualize = this.shadingsManger.ShadingSurfaces[indexForPointsToVisualize].LastSensorPoints;
 				DA.SetDataList(4, pointsToVisualize);
 			}
 

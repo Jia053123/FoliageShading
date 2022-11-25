@@ -18,6 +18,7 @@ namespace FoliageShading
 		public Vector3d FacingDirection { get { return _facingDirection; }}
 		public Double TotalSunlightCapture { get { return _totalSunlightCapture; }}
 		public Double Area { get { return AreaMassProperties.Compute(this.Surface, true, false, false, false).Area; } }
+		public List<Point3d> LastSensorPoints;
 
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetLogger("Default");
 		private Vector3d _normalDirection;
@@ -84,6 +85,7 @@ namespace FoliageShading
 		public void SetRadiationDataAndUpdate(List<Point3d> points, List<double> radiationAtPoints)
 		{
 			//Debug.WriteLine(points.Count);
+			this.LastSensorPoints = points;
 			this._totalSunlightCapture = radiationAtPoints.Sum();
 			Logger.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
 
@@ -131,7 +133,6 @@ namespace FoliageShading
 			//Debug.WriteLine("light: " + this._totalSunlightCapture.ToString());
 			//Debug.WriteLine("area: " + this.Area.ToString());
 
-			//double growthFactor = 1 + Math.Tanh(this._totalSunlightCapture - Math.Pow(this.Area * 9.0, 2.08 - this.NatrualGrowthFactor * 0.10)) * 0.2;//(0.5 - Math.Log10(this.Iteration + 1)*0.20);
 			double growthFactor = 1 + Math.Tanh(this._totalSunlightCapture - Math.Pow(this.Area * 9.0, 2.0)) * 0.2;
 			Debug.WriteLine(growthFactor);
 
