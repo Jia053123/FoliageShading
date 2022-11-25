@@ -84,10 +84,10 @@ namespace FoliageShading
 		/// </summary>
 		public void SetRadiationDataAndUpdate(List<Point3d> points, List<double> radiationAtPoints)
 		{
-			//Debug.WriteLine(points.Count);
 			this.LastSensorPoints = points;
-			this._totalSunlightCapture = radiationAtPoints.Sum();
+			this._totalSunlightCapture = radiationAtPoints.Average() * this.Area;
 			Logger.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
+			Debug.Print("Before: " + radiationAtPoints.Sum().ToString() + " After: " + this._totalSunlightCapture.ToString());
 
 			this.Turn();
 			this.Grow();
@@ -101,7 +101,7 @@ namespace FoliageShading
 		{
 			if (Double.IsNaN(this.previousTotalSunlighCapture) || Double.IsNaN(this.previousRotateAngle))
 			{
-				double angle = 0;
+				double angle;
 				if (rand.Next(0,2) == 0)
 				{
 					angle = 0.1;
@@ -121,7 +121,7 @@ namespace FoliageShading
 				}
 				else
 				{
-					double newAngle = -1.0 * this.previousRotateAngle * 0.6;
+					double newAngle = -1.0 * this.previousRotateAngle * 0.8;
 					this.RotateAroundFacingDirection(newAngle); // rotate back by a lesser degree
 					this.previousRotateAngle = newAngle;
 				}
@@ -133,7 +133,7 @@ namespace FoliageShading
 			//Debug.WriteLine("light: " + this._totalSunlightCapture.ToString());
 			//Debug.WriteLine("area: " + this.Area.ToString());
 
-			double growthFactor = 1 + Math.Tanh(this._totalSunlightCapture - Math.Pow(this.Area * 9.0, 2.0)) * 0.2;
+			double growthFactor = 1 + Math.Tanh(this._totalSunlightCapture - Math.Pow(this.Area * 9.2, 2.2)) * 0.2;
 			Debug.WriteLine(growthFactor);
 
 			Plane plane;

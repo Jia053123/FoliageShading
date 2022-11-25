@@ -31,11 +31,11 @@ namespace FoliageShading
 
 		protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
 		{
-			pManager.AddGeometryParameter("Base Surfaces", "B", "The areas to fill in with shadings", GH_ParamAccess.list);
-			pManager.AddNumberParameter("Interval Distance", "ID", "Horizontal distance between two shadings, in the model unit", GH_ParamAccess.item);
-			pManager.AddNumberParameter("Growth Point Interval", "GPI", "Vertical distance between two growth points, influencing density", GH_ParamAccess.item);
-			pManager.AddPointParameter("Points for Ladybug Incident Radiation simulation", "P", "The points where the simulation is done for Ladybug Incident Radiation component", GH_ParamAccess.list);
-			pManager.AddNumberParameter("Ladybug Incident Radiation Results", "LIR", "The 'results' output from Ladybug Incident Radiation component", GH_ParamAccess.list);
+			pManager.AddGeometryParameter("Base Surfaces", "BaseSurf", "The areas to fill in with shadings", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Interval Distance", "HoriInterval", "Horizontal distance between two shadings, in the model unit", GH_ParamAccess.item);
+			pManager.AddNumberParameter("Growth Point Interval", "VertInterval", "Vertical distance between two growth points, influencing density", GH_ParamAccess.item);
+			pManager.AddPointParameter("Points for Ladybug Incident Radiation simulation", "SensorPts", "The points where the simulation is done for Ladybug Incident Radiation component", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Ladybug Incident Radiation Results", "RadiationResults", "The 'results' output from Ladybug Incident Radiation component", GH_ParamAccess.list);
 			pManager.AddIntegerParameter("Points for shading at index", "PFS", "Visuallize simulation grid points locations for each shading by index", GH_ParamAccess.item);
 
 			pManager[3].Optional = true;
@@ -45,10 +45,10 @@ namespace FoliageShading
 
 		protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
 		{
-			pManager.AddCurveParameter("Support Wires", "W", "The wires that support the shadings", GH_ParamAccess.list);
-			pManager.AddSurfaceParameter("Shadings", "S", "The many pieces of the shadings generated", GH_ParamAccess.list);
-			pManager.AddNumberParameter("Grid Size for Ladybug Incident Radiation", "GS", "The grid size to use for Ladybug Incident Radiation simulations", GH_ParamAccess.item);
-			pManager.AddTextParameter("Log", "L", "Information about the state of the compoment", GH_ParamAccess.item);
+			pManager.AddCurveParameter("Support Wires", "Wires", "The wires that support the shadings", GH_ParamAccess.list);
+			pManager.AddSurfaceParameter("Shadings", "Shadings", "The many pieces of the shadings generated", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Grid Size for Ladybug Incident Radiation", "GridSize", "The grid size to use for Ladybug Incident Radiation simulations", GH_ParamAccess.item);
+			pManager.AddTextParameter("Log", "Log", "Information about the state of the compoment", GH_ParamAccess.item);
 			pManager.AddPointParameter("Points for shading at index", "P", "The Points for shading at selected index for debugging", GH_ParamAccess.list);
 
 			pManager.HideParameter(0);
