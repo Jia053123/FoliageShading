@@ -157,8 +157,8 @@ namespace FoliageShading
 				Vector3d translation = new Vector3d(gp); // the vector points from 0,0,0 to gp
 				surface.TranslateSurface(translation);
 
-				surface.NatrualGrowthFactor = gp.Z / Constants.centerLinesHeight;
-				Debug.WriteLine(surface.NatrualGrowthFactor);
+				surface.NatrualGrowthPenaltyFactor = 1.0 - gp.Z / Constants.centerLinesHeight;
+				Debug.WriteLine(surface.NatrualGrowthPenaltyFactor);
 
 				startingSurfaces.Add(surface);
 			}
