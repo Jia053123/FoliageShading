@@ -80,7 +80,7 @@ namespace FoliageShading
 		/// </summary>
 		public void SetRadiationDataAndUpdate(List<Point3d> points, List<double> radiationAtPoints)
 		{
-			Debug.WriteLine(points.Count);
+			//Debug.WriteLine(points.Count);
 			this._totalSunlightCapture = radiationAtPoints.Sum();
 			//Debug.WriteLine(this._totalSunlightCapture);
 			Logger.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
@@ -124,7 +124,7 @@ namespace FoliageShading
 
 		private void Grow()
 		{
-			if (this._totalSunlightCapture > 1000 * 4)
+			if (this._totalSunlightCapture > 900 * 4)
 			{
 				Plane plane;
 				this.Surface.TryGetPlane(out plane);

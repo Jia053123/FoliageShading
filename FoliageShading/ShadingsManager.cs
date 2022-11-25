@@ -72,7 +72,7 @@ namespace FoliageShading
 			surface.ClosestPoint(point, out u, out v);
 			var surf_p = surface.PointAt(u, v);
 
-			return surf_p.DistanceTo(point) <= RhinoDoc.ActiveDoc.ModelAbsoluteTolerance + 0.35; // refactor if porting to Mac
+			return surf_p.DistanceTo(point) < RhinoDoc.ActiveDoc.ModelAbsoluteTolerance + 0.33; // default offset is 10cm = 0.328084... feet; refactor ActiveDoc if porting to Mac
 		}
 
 		private List<Curve> CreateCenterLines(Surface baseSurface, double intervalDist)
