@@ -135,11 +135,8 @@ namespace FoliageShading
 			if (roughNumOfPointsForEachShading % 1 != 0) 
 			{
 				roughNumOfPointsForEachShading = Math.Floor(roughNumOfPointsForEachShading);
-				logOutput += Environment.NewLine + "Warning: Num of points is not a muliple of the num of shadings";
 			}
-			
 			int numOfPointsForEachShading = (int) roughNumOfPointsForEachShading;
-
 			if (indexForPointsToVisualize > -1)
 			{
 				List<Point3d> pointsToVisualize = radiationPoints.GetRange(indexForPointsToVisualize * numOfPointsForEachShading, numOfPointsForEachShading);

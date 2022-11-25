@@ -64,19 +64,6 @@ namespace FoliageShading
 				}
 				ss.SetRadiationDataAndUpdate(sps, rdaps);
 			}
-
-
-			//double roughNumOfPointsForEachShading = sensorPoints.Count / this._shadingSurfaces.Count;
-			//int numOfPointsForEachShading = (int) Math.Floor(roughNumOfPointsForEachShading);
-			//Debug.Assert(numOfPointsForEachShading == roughNumOfPointsForEachShading);
-
-			//for (int i = 0; i < this._shadingSurfaces.Count; i++)
-			//{
-			//	var s = this._shadingSurfaces[i];
-			//	int startIndex = i * numOfPointsForEachShading;
-			//	int pointCount = numOfPointsForEachShading;
-			//	s.SetRadiationDataAndUpdate(sensorPoints.GetRange(startIndex, pointCount), radiationDataAtPoints.GetRange(startIndex, pointCount));
-			//}
 		}
 
 		private bool IsPointOnSurface(Point3d point, Surface surface)
