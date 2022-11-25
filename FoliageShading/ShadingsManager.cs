@@ -25,14 +25,13 @@ namespace FoliageShading
 			{
 				centerLines.AddRange(this.CreateCenterLines(s, intervalDist));
 			}
-			Constants.centerLinesHeight = centerLines.First().GetLength();
 
 			List<ShadingSurface> shadings = new List<ShadingSurface>();
 			bool isEvenIndex = true;
 			foreach (Curve cl in centerLines)
 			{
 				List<Point3d> growthPoints = this.CreateGrowthPoints(isEvenIndex, cl, growthPointInterval);
-				shadings.AddRange(this.CreateStartingShadingPlanes(growthPoints, startingShadingDepth, intervalDist, baseSurfaces.First().NormalAt(0, 0)));
+				shadings.AddRange(this.CreateStartingShadingPlanes(cl, growthPoints, startingShadingDepth, intervalDist, baseSurfaces.First().NormalAt(0, 0)));
 				isEvenIndex = !isEvenIndex;
 			}
 
@@ -141,13 +140,15 @@ namespace FoliageShading
 			return growthPoints;
 		}
 
-		private List<ShadingSurface> CreateStartingShadingPlanes(List<Point3d> growthPoints, double startingShadingDepth, double intervalDistance, Vector3d outsideDirection)
+		private List<ShadingSurface> CreateStartingShadingPlanes(Curve centerline, List<Point3d> growthPoints, double startingShadingDepth, double intervalDistance, Vector3d outsideDirection)
 		{
 			List<ShadingSurface> startingSurfaces = new List<ShadingSurface>();
 			var rand = new Random();
 			foreach (Point3d gp in growthPoints)
 			{
-				ShadingSurface surface = new ShadingSurface(Plane.WorldXY, new Interval(-1 * startingShadingDepth / 2.0, startingShadingDepth / 2.0), new Interval(-1 * intervalDistance / 2.0, intervalDistance / 2.0), rand.Next()-1);
+				double growthPenalty = 1.0 - (gp.Z - centerline.PointAt(0).Z) / centerline.GetLength();
+				Debug.Print("growth penalty: " + growthPenalty.ToString());
+				ShadingSurface surface = new ShadingSurface(growthPenalty, Plane.WorldXY, new Interval(-1 * startingShadingDepth / 2.0, startingShadingDepth / 2.0), new Interval(-1 * intervalDistance / 2.0, intervalDistance / 2.0), rand.Next()-1);
 
 				Vector3d defaultDirection = surface.FacingDirection;
 				double rotationAngle = Math.Atan2(outsideDirection.Y * defaultDirection.X - outsideDirection.X * defaultDirection.Y, outsideDirection.X * defaultDirection.X + outsideDirection.Y * defaultDirection.Y);
@@ -156,9 +157,6 @@ namespace FoliageShading
 
 				Vector3d translation = new Vector3d(gp); // the vector points from 0,0,0 to gp
 				surface.TranslateSurface(translation);
-
-				surface.NatrualGrowthPenaltyFactor = 1.0 - gp.Z / Constants.centerLinesHeight;
-				Debug.WriteLine(surface.NatrualGrowthPenaltyFactor);
 
 				startingSurfaces.Add(surface);
 			}

@@ -25,7 +25,6 @@ namespace FoliageShading
 		private Vector3d _facingDirection;
 		private Double _totalSunlightCapture;
 
-		//private bool isAnglePass = true;
 		private double previousTotalSunlighCapture = Double.NaN;
 		private double previousRotateAngle = Double.NaN;
 
@@ -37,8 +36,9 @@ namespace FoliageShading
 		/// </summary>
 		public PlaneSurface Surface { get; }
 
-		public ShadingSurface(Plane plane, Interval xExtents, Interval yExtents, int seed)
+		public ShadingSurface(Double naturalGrowthPenaltyFactor, Plane plane, Interval xExtents, Interval yExtents, int seed)
 		{
+			this.NatrualGrowthPenaltyFactor = naturalGrowthPenaltyFactor;
 			this.Surface = new PlaneSurface(plane, xExtents, yExtents);
 			// reparameterize
 			this.Surface.SetDomain(0, new Interval(0, 1));
@@ -119,7 +119,7 @@ namespace FoliageShading
 				{
 					this.RotateAroundFacingDirection(this.previousRotateAngle); // getting more light, so keep doing it
 				}
-				else
+				else // including equal case
 				{
 					double newAngle = -1.0 * this.previousRotateAngle * 0.8;
 					this.RotateAroundFacingDirection(newAngle); // rotate back by a lesser degree
