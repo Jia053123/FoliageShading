@@ -27,10 +27,12 @@ namespace FoliageShading
 			}
 
 			List<ShadingSurface> shadings = new List<ShadingSurface>();
+			bool isEvenIndex = true;
 			foreach (Curve cl in centerLines)
 			{
-				List<Point3d> growthPoints = this.CreateGrowthPoints(cl, growthPointInterval);
+				List<Point3d> growthPoints = this.CreateGrowthPoints(isEvenIndex, cl, growthPointInterval);
 				shadings.AddRange(this.CreateStartingShadingPlanes(growthPoints, startingShadingDepth, intervalDist, baseSurfaces.First().NormalAt(0, 0)));
+				isEvenIndex = !isEvenIndex;
 			}
 
 			this._shadingSurfaces = shadings;
@@ -99,16 +101,25 @@ namespace FoliageShading
 			return isoCurves;
 		}
 
-		private List<Point3d> CreateGrowthPoints(Curve centerLine, Double growthPointInterval)
+		private List<Point3d> CreateGrowthPoints(bool isEvenIndex, Curve centerLine, Double growthPointInterval)
 		{
 			// reparameterize
 			centerLine.Domain = new Interval(0, 1);
 
 			double totalHeight = centerLine.GetLength();
-			int numberOfGrowthPoints = (int)Math.Floor(totalHeight / growthPointInterval); // no points at either ends 
+			int numberOfGrowthPoints = (int)Math.Floor(totalHeight / growthPointInterval) - 1; // no points at either ends; minus 1 for shifting 
 			double growthPointIntervalInV = 1.0 / numberOfGrowthPoints;
 
-			double padding = growthPointIntervalInV / 2.0;
+			double padding;
+			if (isEvenIndex)
+			{
+				padding = growthPointIntervalInV * 0.25;
+			}
+			else
+			{
+				padding = growthPointIntervalInV * 0.75;
+			}
+			
 
 			List<Point3d> growthPoints = new List<Point3d>();
 			for (int i = 0; i < numberOfGrowthPoints; i++)
