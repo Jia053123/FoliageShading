@@ -125,13 +125,17 @@ namespace FoliageShading
 
 		private void Grow()
 		{
-			if (this._totalSunlightCapture > 900 * 4)
-			{
-				Plane plane;
-				this.Surface.TryGetPlane(out plane);
-				Transform scale1d = Transform.Scale(plane, 1.1, 1, 1);
-				this.Surface.Transform(scale1d);
-			}
+			//Debug.WriteLine("light: " + this._totalSunlightCapture.ToString());
+			//Debug.WriteLine("area: " + this.Area.ToString());
+
+			//double initialArea = Constants.startingShadingDepth * Constants.intervalDistanceHorizontal;
+			double growthFactor = 1 + Math.Tanh(this._totalSunlightCapture - Math.Pow((this.Area)*10, 2)) / 2;
+			Debug.WriteLine(growthFactor);
+
+			Plane plane;
+			this.Surface.TryGetPlane(out plane);
+			Transform scale1d = Transform.Scale(plane, growthFactor, 1, 1);
+			this.Surface.Transform(scale1d);
 		}
 	}
 }

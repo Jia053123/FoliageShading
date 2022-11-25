@@ -11,7 +11,6 @@ namespace FoliageShading
 {
 	public class FoliageShadingComponent : GH_Component
 	{
-		private Double startingShadingDepth = 1.0;
 		private bool hasPointsData = false;
 		private bool hasResultsData = false;
 		private String logOutput = "";
@@ -71,7 +70,9 @@ namespace FoliageShading
 
 			if (!DA.GetDataList(0, baseSurfaces)) return;
 			if (!DA.GetData(1, ref interval)) return;
+			Constants.intervalDistanceHorizontal = interval;
 			if (!DA.GetData(2, ref growthPointInterval)) return;
+			Constants.growthPointInterval = growthPointInterval;
 
 			if (DA.GetDataList(3, radiationPoints) && radiationPoints.Count > 1)
 			{
@@ -107,7 +108,7 @@ namespace FoliageShading
 
 			if (!this.shadingsManger.IsInitialized)
 			{
-				this.shadingsManger.InitializeShadingSurfaces(baseSurfaces, interval, growthPointInterval, startingShadingDepth);
+				this.shadingsManger.InitializeShadingSurfaces(baseSurfaces, interval, growthPointInterval, Constants.startingShadingDepth);
 			}
 			else if (this.hasPointsData && this.hasResultsData)
 			{
@@ -125,7 +126,7 @@ namespace FoliageShading
 			}
 			DA.SetDataList(1, shadingsOutput);
 
-			double gridSize = this.startingShadingDepth;
+			double gridSize = Constants.startingShadingDepth;
 			DA.SetData(2, gridSize);
 
 			logOutput += Environment.NewLine + iteration.ToString();
