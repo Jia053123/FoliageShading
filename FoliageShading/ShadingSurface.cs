@@ -82,7 +82,6 @@ namespace FoliageShading
 		{
 			//Debug.WriteLine(points.Count);
 			this._totalSunlightCapture = radiationAtPoints.Sum();
-			//Debug.WriteLine(this._totalSunlightCapture);
 			Logger.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
 
 			this.Turn();
@@ -104,7 +103,6 @@ namespace FoliageShading
 				{
 					angle = -0.1;
 				}
-				//Debug.WriteLine(angle);
 				this.RotateAroundFacingDirection(angle); // this is the first iteration
 				this.previousRotateAngle = angle;
 			}
@@ -128,8 +126,7 @@ namespace FoliageShading
 			//Debug.WriteLine("light: " + this._totalSunlightCapture.ToString());
 			//Debug.WriteLine("area: " + this.Area.ToString());
 
-			//double initialArea = Constants.startingShadingDepth * Constants.intervalDistanceHorizontal;
-			double growthFactor = 1 + Math.Tanh(this._totalSunlightCapture - Math.Pow((this.Area)*10, 2)) / 2;
+			double growthFactor = 1 + Math.Tanh(this._totalSunlightCapture - Math.Pow((this.Area)*9.0, 2)) * 0.25;
 			Debug.WriteLine(growthFactor);
 
 			Plane plane;
