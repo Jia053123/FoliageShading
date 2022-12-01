@@ -46,14 +46,14 @@ namespace FoliageShading
 			Debug.Assert(sensorPoints.Count == radiationDataAtPoints.Count);
 
 			List<int> indexesOfDeadShadings = new List<int>();
-			for (int i = 0; i < this._shadingSurfaces.Count; i++)
+			for (int i = this._shadingSurfaces.Count - 1; i >= 0 ; i--)
 			{
 				ShadingSurface ss = this._shadingSurfaces[i];
 				List<Point3d> sps = new List<Point3d>();
 				List<double> rdaps = new List<double>();
 				List<int> indexesAlreadyAdded = new List<int>();
 
-				for (int j = 0; j < sensorPoints.Count; j++)
+				for (int j = sensorPoints.Count - 1; j >= 0; j--)
 				{
 					if (!indexesAlreadyAdded.Contains(j)) // each point belongs only to one surface
 					{
@@ -73,7 +73,7 @@ namespace FoliageShading
 				}
 			}
 
-			for (int i = indexesOfDeadShadings.Count-1; i >= 0; i--) // indexesOfDeadShadings must be ascending
+			for (int i = 0; i < indexesOfDeadShadings.Count; i++) // indexesOfDeadShadings must be ascending
 			{
 				this._shadingSurfaces.RemoveAt(indexesOfDeadShadings[i]);
 			}
@@ -148,7 +148,7 @@ namespace FoliageShading
 			{
 				double growthPenalty = 1.0 - (gp.Z - centerline.PointAt(0).Z) / centerline.GetLength();
 				Debug.Print("growth penalty: " + growthPenalty.ToString());
-				ShadingSurface surface = new ShadingSurface(growthPenalty, Plane.WorldXY, new Interval(-1 * startingShadingDepth / 2.0, startingShadingDepth / 2.0), new Interval(-1 * intervalDistance / 2.0, intervalDistance / 2.0), rand.Next()-1);
+				ShadingSurface surface = new ShadingSurface(growthPenalty, Plane.WorldXY, new Interval(-1 * startingShadingDepth / 2.0, startingShadingDepth / 2.0), new Interval(-1 * intervalDistance / 1.8, intervalDistance / 1.8), rand.Next()-1);
 
 				Vector3d defaultDirection = surface.FacingDirection;
 				double rotationAngle = Math.Atan2(outsideDirection.Y * defaultDirection.X - outsideDirection.X * defaultDirection.Y, outsideDirection.X * defaultDirection.X + outsideDirection.Y * defaultDirection.Y);

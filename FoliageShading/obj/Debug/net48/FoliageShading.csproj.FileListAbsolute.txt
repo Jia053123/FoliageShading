@@ -8,4 +8,3 @@ C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\obj\Debug\net48
 C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\bin\Debug\net48\NLog.dll
 C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\obj\Debug\net48\FoliageShading.csproj.CopyComplete
 C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\obj\Debug\net48\FoliageShading.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Jialiang\Documents\MyCode\FoliageShading\FoliageShading\obj\Debug\net48\FoliageShading.csproj.AssemblyReference.cache
