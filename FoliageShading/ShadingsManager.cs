@@ -46,7 +46,7 @@ namespace FoliageShading
 			Debug.Assert(sensorPoints.Count == radiationDataAtPoints.Count);
 
 			List<int> indexesOfDeadShadings = new List<int>();
-			for (int i = this._shadingSurfaces.Count - 1; i >= 0 ; i--)
+			for (int i = this._shadingSurfaces.Count - 1; i >= 0 ; i--) // try doing this backwards so the order is bottom to top, east to west (shading with less light grow first)
 			{
 				ShadingSurface ss = this._shadingSurfaces[i];
 				List<Point3d> sps = new List<Point3d>();
@@ -73,7 +73,7 @@ namespace FoliageShading
 				}
 			}
 
-			for (int i = 0; i < indexesOfDeadShadings.Count; i++) // indexesOfDeadShadings must be ascending
+			for (int i = 0; i < indexesOfDeadShadings.Count; i++) // indexesOfDeadShadings must be descending
 			{
 				this._shadingSurfaces.RemoveAt(indexesOfDeadShadings[i]);
 			}

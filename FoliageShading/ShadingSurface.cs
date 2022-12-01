@@ -14,6 +14,8 @@ namespace FoliageShading
 		public bool Alive = true;
 		public Double NatrualGrowthPenaltyFactor = Double.NaN;
 		public int Iteration = 0;
+		public bool IsAngleIteration;
+
 		public Vector3d NormalDirection { get { return _normalDirection; }}
 		public Vector3d FacingDirection { get { return _facingDirection; }}
 		public Double TotalSunlightCapture { get { return _totalSunlightCapture; }}
