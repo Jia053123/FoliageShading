@@ -132,7 +132,7 @@ namespace FoliageShading
 		{
 			//Debug.WriteLine("light: " + this._totalSunlightCapture.ToString());
 			//Debug.WriteLine("area: " + this.Area.ToString());
-			double sizePenalty = Math.Pow(this.Area * (8.0 + 5.0*Math.Pow(NatrualGrowthPenaltyFactor, 5)), 2.25);
+			double sizePenalty = Math.Pow(this.Area * (8.0 + 5.0*Math.Pow(NatrualGrowthPenaltyFactor, 50)), 2.25);
 			double growthFactor = 1 + Math.Tanh(this._totalSunlightCapture - sizePenalty) * 0.2;
 
 			Plane plane;
