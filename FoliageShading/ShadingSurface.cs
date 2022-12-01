@@ -14,7 +14,7 @@ namespace FoliageShading
 		public bool Alive = true;
 		public Double NatrualGrowthPenaltyFactor = Double.NaN;
 		public int Iteration = 0;
-		public bool IsAngleIteration;
+		//public bool IsAngleIteration;
 
 		public Vector3d NormalDirection { get { return _normalDirection; }}
 		public Vector3d FacingDirection { get { return _facingDirection; }}
@@ -51,6 +51,8 @@ namespace FoliageShading
 			this._totalSunlightCapture = Double.NaN;
 
 			this.rand = new Random(seed);
+
+		//	this.IsAngleIteration = doesStartWithAngle;
 		}
 
 		/// <summary>
@@ -84,14 +86,45 @@ namespace FoliageShading
 		/// <summary>
 		/// Update the shading for each iteration
 		/// </summary>
-		public void SetRadiationDataAndUpdate(List<Point3d> points, List<double> radiationAtPoints)
+		public void SetRadiationDataAndUpdateAnglePass0(List<Point3d> points, List<double> radiationAtPoints)
 		{
 			this.LastSensorPoints = points;
 			this._totalSunlightCapture = radiationAtPoints.Average() * this.Area;
 			Logger.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
 			Debug.Print("Before: " + radiationAtPoints.Sum().ToString() + " After: " + this._totalSunlightCapture.ToString());
 
+			//this.Turn();
+			//this.Grow();
+			//this.Survive();
+
+			this.previousTotalSunlighCapture = this._totalSunlightCapture;
+			//this.Iteration++;
+		}
+
+		public void SetRadiationDataAndUpdateAnglePass1(List<Point3d> points, List<double> radiationAtPoints)
+		{
+			this.LastSensorPoints = points;
+			this._totalSunlightCapture = radiationAtPoints.Average() * this.Area;
+
 			this.Turn();
+			//this.Grow();
+			//this.Survive();
+
+			this.previousTotalSunlighCapture = this._totalSunlightCapture;
+			//this.Iteration++;
+		}
+
+		/// <summary>
+		/// Update the shading for each iteration
+		/// </summary>
+		public void SetRadiationDataAndUpdateSize(List<Point3d> points, List<double> radiationAtPoints)
+		{
+			this.LastSensorPoints = points;
+			this._totalSunlightCapture = radiationAtPoints.Average() * this.Area;
+			Logger.Debug("total sunlight capture = " + this._totalSunlightCapture.ToString());
+			Debug.Print("Before: " + radiationAtPoints.Sum().ToString() + " After: " + this._totalSunlightCapture.ToString());
+
+			//this.Turn();
 			this.Grow();
 			this.Survive();
 

@@ -41,41 +41,79 @@ namespace FoliageShading
 			this._isInitialized = true;
 		}
 
-		public void UpdateSurfacesWithRadiationData(List<Point3d> sensorPoints, List<double> radiationDataAtPoints)
+		/// <param name="pass">equal to 0-2. After pass 2 is pass 0</param>
+		public void UpdateSurfacesWithRadiationData(List<Point3d> sensorPoints, List<double> radiationDataAtPoints, int pass)
 		{
 			Debug.Assert(sensorPoints.Count == radiationDataAtPoints.Count);
 
-			List<int> indexesOfDeadShadings = new List<int>();
-			for (int i = this._shadingSurfaces.Count - 1; i >= 0 ; i--) // try doing this backwards so the order is bottom to top, east to west (shading with less light grow first)
+			if (pass == 0 || pass == 1)
 			{
-				ShadingSurface ss = this._shadingSurfaces[i];
-				List<Point3d> sps = new List<Point3d>();
-				List<double> rdaps = new List<double>();
-				List<int> indexesAlreadyAdded = new List<int>();
-
-				for (int j = sensorPoints.Count - 1; j >= 0; j--)
+				for (int i = 0; i < this._shadingSurfaces.Count; i++) // try doing this forwards so that the top, west ones rotate first
 				{
-					if (!indexesAlreadyAdded.Contains(j)) // each point belongs only to one surface
+					ShadingSurface ss = this._shadingSurfaces[i];
+					List<Point3d> sps = new List<Point3d>();
+					List<double> rdaps = new List<double>();
+					List<int> indexesAlreadyAdded = new List<int>();
+
+					for (int j = 0; j < sensorPoints.Count; j++)
 					{
-						var p = sensorPoints[j];
-						if (this.IsPointOnSurface(p, ss.Surface))
+						if (!indexesAlreadyAdded.Contains(j)) // each point belongs only to one surface
 						{
-							sps.Add(p);
-							rdaps.Add(radiationDataAtPoints[j]);
-							indexesAlreadyAdded.Add(j); 
+							var p = sensorPoints[j];
+							if (this.IsPointOnSurface(p, ss.Surface))
+							{
+								sps.Add(p);
+								rdaps.Add(radiationDataAtPoints[j]);
+								indexesAlreadyAdded.Add(j);
+							}
 						}
 					}
-				}
-				ss.SetRadiationDataAndUpdate(sps, rdaps);
-				if (!ss.Alive)
-				{
-					indexesOfDeadShadings.Add(i);
+					if (pass == 0)
+					{
+						ss.SetRadiationDataAndUpdateAnglePass0(sps, rdaps);
+					}
+					else 
+					{
+						Debug.Assert(pass == 1);
+						ss.SetRadiationDataAndUpdateAnglePass1(sps, rdaps);
+					}
 				}
 			}
-
-			for (int i = 0; i < indexesOfDeadShadings.Count; i++) // indexesOfDeadShadings must be descending
+			else 
 			{
-				this._shadingSurfaces.RemoveAt(indexesOfDeadShadings[i]);
+				Debug.Assert(pass == 2);
+				List<int> indexesOfDeadShadings = new List<int>();
+				for (int i = this._shadingSurfaces.Count - 1; i >= 0; i--) // try doing this backwards so the order is bottom to top, east to west (shading with less light grow first)
+				{
+					ShadingSurface ss = this._shadingSurfaces[i];
+					List<Point3d> sps = new List<Point3d>();
+					List<double> rdaps = new List<double>();
+					List<int> indexesAlreadyAdded = new List<int>();
+
+					for (int j = sensorPoints.Count - 1; j >= 0; j--)
+					{
+						if (!indexesAlreadyAdded.Contains(j)) // each point belongs only to one surface
+						{
+							var p = sensorPoints[j];
+							if (this.IsPointOnSurface(p, ss.Surface))
+							{
+								sps.Add(p);
+								rdaps.Add(radiationDataAtPoints[j]);
+								indexesAlreadyAdded.Add(j);
+							}
+						}
+					}
+					ss.SetRadiationDataAndUpdateSize(sps, rdaps);
+					if (!ss.Alive)
+					{
+						indexesOfDeadShadings.Add(i);
+					}
+				}
+
+				for (int i = 0; i < indexesOfDeadShadings.Count; i++) // indexesOfDeadShadings must be descending
+				{
+					this._shadingSurfaces.RemoveAt(indexesOfDeadShadings[i]);
+				}
 			}
 		}
 
@@ -148,7 +186,7 @@ namespace FoliageShading
 			{
 				double growthPenalty = 1.0 - (gp.Z - centerline.PointAt(0).Z) / centerline.GetLength();
 				Debug.Print("growth penalty: " + growthPenalty.ToString());
-				ShadingSurface surface = new ShadingSurface(growthPenalty, Plane.WorldXY, new Interval(-1 * startingShadingDepth / 2.0, startingShadingDepth / 2.0), new Interval(-1 * intervalDistance / 1.8, intervalDistance / 1.8), rand.Next()-1);
+				ShadingSurface surface = new ShadingSurface(growthPenalty, Plane.WorldXY, new Interval(-1 * startingShadingDepth / 2.0, startingShadingDepth / 2.0), new Interval(-1 * intervalDistance / 2.0, intervalDistance / 2.0), rand.Next()-1);
 
 				Vector3d defaultDirection = surface.FacingDirection;
 				double rotationAngle = Math.Atan2(outsideDirection.Y * defaultDirection.X - outsideDirection.X * defaultDirection.Y, outsideDirection.X * defaultDirection.X + outsideDirection.Y * defaultDirection.Y);

@@ -112,7 +112,7 @@ namespace FoliageShading
 			}
 			else if (this.hasPointsData && this.hasResultsData)
 			{
-				this.shadingsManger.UpdateSurfacesWithRadiationData(radiationPoints, radiationResults);
+				this.shadingsManger.UpdateSurfacesWithRadiationData(radiationPoints, radiationResults, iteration % 3);
 			}
 
 			/////////////////// Step3: Output 
